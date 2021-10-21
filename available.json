@@ -1,0 +1,267 @@
+{
+   "SquadronTagData":{
+      "SquadronTagCollections":[
+         {
+            "localisedCollectionName":"Activities",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":0,
+                  "LocalisedString":"Anti-Xeno Activists",
+                  "ServerString":"Activities_AntiXenoActivists"
+               },
+               {
+                  "ServerUniqueId":1,
+                  "LocalisedString":"Bounty Hunters",
+                  "ServerString":"Activities_BountyHunters"
+               },
+               {
+                  "ServerUniqueId":2,
+                  "LocalisedString":"Explorers",
+                  "ServerString":"Activities_Explorers"
+               },
+               {
+                  "ServerUniqueId":3,
+                  "LocalisedString":"Faction Supporters",
+                  "ServerString":"Activities_FactionSupporters"
+               },
+               {
+                  "ServerUniqueId":4,
+                  "LocalisedString":"Humanitarian Aid Providers",
+                  "ServerString":"Activities_Humanitarian"
+               },
+               {
+                  "ServerUniqueId":5,
+                  "LocalisedString":"Pirates",
+                  "ServerString":"Activities_Pirates"
+               },
+               {
+                  "ServerUniqueId":6,
+                  "LocalisedString":"Power Supporters",
+                  "ServerString":"Activities_PowerSupporters"
+               },
+               {
+                  "ServerUniqueId":7,
+                  "LocalisedString":"Traders and Miners",
+                  "ServerString":"Activities_TradersMiners"
+               },
+               {
+                  "ServerUniqueId":47,
+                  "LocalisedString":"Mentoring",
+                  "ServerString":"Activities_Mentoring"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Attitude",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":9,
+                  "LocalisedString":"Relaxed",
+                  "ServerString":"GameMode_Relaxed"
+               },
+               {
+                  "ServerUniqueId":10,
+                  "LocalisedString":"Family",
+                  "ServerString":"GameMode_Family"
+               },
+               {
+                  "ServerUniqueId":11,
+                  "LocalisedString":"Devoted",
+                  "ServerString":"GameMode_Devoted"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Languages",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":12,
+                  "LocalisedString":"English",
+                  "ServerString":"Languages_English",
+                  "LanguageTagIdentifier":"english"
+               },
+               {
+                  "ServerUniqueId":13,
+                  "LocalisedString":"Portuguese",
+                  "ServerString":"Languages_Portuguese",
+                  "LanguageTagIdentifier":"portuguese"
+               },
+               {
+                  "ServerUniqueId":14,
+                  "LocalisedString":"German",
+                  "ServerString":"Languages_German",
+                  "LanguageTagIdentifier":"german"
+               },
+               {
+                  "ServerUniqueId":15,
+                  "LocalisedString":"French",
+                  "ServerString":"Languages_French",
+                  "LanguageTagIdentifier":"french"
+               },
+               {
+                  "ServerUniqueId":31,
+                  "LocalisedString":"Spanish",
+                  "ServerString":"Languages_Spanish",
+                  "LanguageTagIdentifier":"spanish"
+               },
+               {
+                  "ServerUniqueId":32,
+                  "LocalisedString":"Russian",
+                  "ServerString":"Languages_Russian",
+                  "LanguageTagIdentifier":"russian"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Time Zone",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":16,
+                  "LocalisedString":"UTC-9 -> UTC-7",
+                  "ServerString":"TimeZone_UTCM9toM7"
+               },
+               {
+                  "ServerUniqueId":17,
+                  "LocalisedString":"UTC-6 -> UTC-3",
+                  "ServerString":"TimeZone_UTCM6toM3"
+               },
+               {
+                  "ServerUniqueId":18,
+                  "LocalisedString":"UTC-1 -> UTC+2",
+                  "ServerString":"TimeZone_UTCM1toP2"
+               },
+               {
+                  "ServerUniqueId":19,
+                  "LocalisedString":"UTC+3 -> UTC+7",
+                  "ServerString":"TimeZone_UTCP3toP7"
+               },
+               {
+                  "ServerUniqueId":33,
+                  "LocalisedString":"UTC+8 -> UTC+12",
+                  "ServerString":"TimeZone_UTCP8toP12"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Game Mode",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":20,
+                  "LocalisedString":"Solo",
+                  "ServerString":"Attitude_Solo"
+               },
+               {
+                  "ServerUniqueId":21,
+                  "LocalisedString":"Open",
+                  "ServerString":"Attitude_Open"
+               },
+               {
+                  "ServerUniqueId":22,
+                  "LocalisedString":"Private",
+                  "ServerString":"Attitude_Private"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Availability",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":24,
+                  "LocalisedString":"Occasional",
+                  "ServerString":"Availability_Occasional"
+               },
+               {
+                  "ServerUniqueId":25,
+                  "LocalisedString":"Weekdays",
+                  "ServerString":"Availability_Weekdays"
+               },
+               {
+                  "ServerUniqueId":26,
+                  "LocalisedString":"Weekends",
+                  "ServerString":"Availability_Weekends"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Play Style",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":28,
+                  "LocalisedString":"PVE",
+                  "ServerString":"PlayStyle_PVE"
+               },
+               {
+                  "ServerUniqueId":29,
+                  "LocalisedString":"PVP",
+                  "ServerString":"PlayStyle_PVP"
+               },
+               {
+                  "ServerUniqueId":30,
+                  "LocalisedString":"Roleplay",
+                  "ServerString":"PlayStyle_RP"
+               }
+            ]
+         },
+         {
+            "localisedCollectionName":"Powerplay Characters",
+            "SquadronTags":[
+               {
+                  "ServerUniqueId":34,
+                  "LocalisedString":"Aisling Duval",
+                  "ServerString":"PowerPlay_AislingDuval"
+               },
+               {
+                  "ServerUniqueId":36,
+                  "LocalisedString":"Arissa Lavigny-Duval",
+                  "ServerString":"PowerPlay_ArissaLavignyDuval"
+               },
+               {
+                  "ServerUniqueId":37,
+                  "LocalisedString":"Denton Patreus",
+                  "ServerString":"PowerPlay_DentonPatreus"
+               },
+               {
+                  "ServerUniqueId":39,
+                  "LocalisedString":"Li Yong-Rui",
+                  "ServerString":"PowerPlay_LiYongRui"
+               },
+               {
+                  "ServerUniqueId":40,
+                  "LocalisedString":"Pranav Antal",
+                  "ServerString":"PowerPlay_SimguruPranavAntal"
+               },
+               {
+                  "ServerUniqueId":41,
+                  "LocalisedString":"Felicia Winters",
+                  "ServerString":"PowerPlay_FeliciaWinters"
+               },
+               {
+                  "ServerUniqueId":42,
+                  "LocalisedString":"Edmund Mahon",
+                  "ServerString":"PowerPlay_EdmundMahon"
+               },
+               {
+                  "ServerUniqueId":43,
+                  "LocalisedString":"Zachary Hudson",
+                  "ServerString":"PowerPlay_ZacharyHudson"
+               },
+               {
+                  "ServerUniqueId":44,
+                  "LocalisedString":"Archon Delaine",
+                  "ServerString":"PowerPlay_ArchonDelaine"
+               },
+               {
+                  "ServerUniqueId":45,
+                  "LocalisedString":"Zemina Torval",
+                  "ServerString":"PowerPlay_ZeminaTorval"
+               },
+               {
+                  "ServerUniqueId":46,
+                  "LocalisedString":"Yuri Grom",
+                  "ServerString":"PowerPlay_YuriGrom"
+               }
+            ]
+         }
+      ]
+   }
+}
