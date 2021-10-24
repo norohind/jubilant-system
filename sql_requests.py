@@ -61,3 +61,8 @@ properly_delete_squad: str = """insert into squads_states (squad_id) values (?);
 check_if_we_already_deleted_squad_in_db: str = """select count(*) 
 from squads_states 
 where squad_id = ? and tag is null"""
+
+select_last_known_id: str = """select squad_id 
+from squads_states 
+order by squad_id desc
+limit 1;"""

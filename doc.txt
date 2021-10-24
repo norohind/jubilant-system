@@ -6,7 +6,7 @@ What to track?
 functionality:
 ASAP check for new squads
 Occasionally iterate over all squads (by id)
-update/insert new data to DB (if nothing changed, then just write empty history record with inserted_timestamp and squad_id)
+update/insert new data to DB
 alert if new data accord to triggers
 
 DB tables
