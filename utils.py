@@ -253,11 +253,11 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
 
             if db_conn.execute(sql_requests.check_if_we_already_deleted_squad_in_db, (squad_id,)).fetchone()[0] == 0:
                 # we don't have it deleted in DB, let's fix it
-                delete_squadron(squad_id, db_conn)
+                properly_delete_squadron(squad_id, db_conn)
 
         elif not suppress_absence:
             # we don't have it in DB at all but let's mark it as deleted to avoid requests to FDEV about it in future
-            delete_squadron(squad_id, db_conn)
+            properly_delete_squadron(squad_id, db_conn)
 
         return False  # squadron stop their existing or never exists... it doesn't exists anyway
 
