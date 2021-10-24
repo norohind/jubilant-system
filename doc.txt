@@ -55,18 +55,18 @@ DB tables
 3. news  # history of news is tracked by news_id so we don't need a news_history table
         squad_id int (squadron id)
         type_of_news text (one of "public_statements", "internal_statements", "recent_activities")
-        news_id int (id field)
-        date int (date field)
-        category text (category field. One of "Squadrons_History_Category_Membership",
+        news_id int (`id` field)
+        date int (`date` field)
+        category text (`category` field. One of "Squadrons_History_Category_Membership",
 "Squadrons_History_Category_Leaderboards", "Squadrons_History_Category_BookmarkShare", "Squadrons_History_Category_Squadron",
 "Squadrons_History_Category_PublicStatement")
-        activity text (activity field)
-        season text (season field)
-        bookmark text (bookmark field)
-        motd text (motd field)
-        author text (author field)
-        cmdr_id int (cmdr_id field, for what and what is it??)
-        user_id int (user_id field)
+        activity text (`activity` field)
+        season int (`season` field)
+        bookmark text (`bookmark` field)
+        motd text (`motd` field)
+        author text (`author` field)
+        cmdr_id int (`cmdr_id` field, for what and what is it, FDEV??)
+        user_id int (`user_id` field)
         inserted_timestamp datetime default current_timestamp
 
 implementation notes:

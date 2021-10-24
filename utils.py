@@ -4,6 +4,14 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 
 
+class FAPIDownForMaintenance(Exception):
+    pass
+
+
+class FAPIUnknownStatusCode(Exception):
+    pass
+
+
 def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
     """Makes request to any url with valid bearer token"""
     bearer: str = _get_bearer()
@@ -18,6 +26,10 @@ def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response
     )
 
     logger.debug(f'Request complete, code {fapiRequest.status_code!r}, len {len(fapiRequest.content)}')
+
+    if fapiRequest.request == 418:  # it does it on maintenance
+        logger.warning(f'{method.upper()} {fapiRequest.url} returned 418, content dump:\n{fapiRequest.content}')
+        raise FAPIDownForMaintenance
 
     return fapiRequest
 

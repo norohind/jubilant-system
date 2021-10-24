@@ -37,3 +37,27 @@ insert_squad_states: str = """insert into squads_states (
     previous_season_aegis_score) 
 values  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 
+insert_news: str = """insert into news (
+squad_id,
+type_of_news,
+news_id,
+date,
+category,
+activity,
+season,
+bookmark,
+motd,
+author,
+cmdr_id,
+user_id)
+values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+
+check_if_squad_exists_in_db: str = """select count(*) 
+from squads_states
+where squad_id = ?;"""
+
+properly_delete_squad: str = """insert into squads_states (squad_id) values (?);"""
+
+check_if_we_already_deleted_squad_in_db: str = """select count(*) 
+from squads_states 
+where squad_id = ? and tag is null"""
