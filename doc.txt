@@ -1,0 +1,83 @@
+What to track?
+1. Squadrons state (info endpoint)
+2. Squadrons news (news/list endpoint)
+3. History of changes both of them
+
+functionality:
+ASAP check for new squads
+Occasionally iterate over all squads (by id)
+update/insert new data to DB (if nothing changed, then just write empty history record with inserted_timestamp and squad_id)
+alert if new data accord to triggers
+
+DB tables
+1. squads_view - contains current state of squadrons, builds automatically by update/insert/delete triggers for `transactions`
+   note: done as view, not a table
+
+2. squads_states - contains history of all updates for every squad, triggers in this table update `view` table
+        squad_id int
+        name text (`name` field, name of the squadron)
+        tag text (4 symbols, `tag` field)
+        owner_name text (`ownerName` field)
+        owner_id int (fid of squad owner, `ownerId` field)
+        platform text (field `platform`)
+        created text (`created` field)
+        created_ts int (`created_ts` field)
+        accepting_new_members bool (`acceptingNewMembers`)
+        power_id int (`powerId` field)
+        power_name text (`powerName` field)
+        super_power_id int (`superpowerId` field)
+        super_power_name text (`superpowerName` field)
+        faction_id int (`factionId` field)
+        faction_name text (`factionName` field)
+        user_tags text (`userTags` field, just raw list)
+        member_count int (`memberCount` field)
+        pending_count int (`pendingCount` field)
+        full bool (`full` field)
+        public_comms bool (`publicComms` field)
+        public_comms_override bool (`publicCommsOverride` field)
+        public_comms_available bool (`publicCommsAvailable` field)
+        current_season_trade_score int (`current_season_trade_score` field)
+        previous_season_trade_score int (`previous_season_trade_score` field)
+        current_season_combat_score int (`current_season_combat_score` field)
+        previous_season_combat_score int (`previous_season_combat_score` field)
+        current_season_exploration_score int (`current_season_exploration_score` field)
+        previous_season_exploration_score int (`previous_season_exploration_score` field)
+        current_season_cqc_score int (`current_season_cqc_score` field)
+        previous_season_cqc_score int (`previous_season_cqc_score` field)
+        current_season_bgs_score int (`current_season_bgs_score` field)
+        previous_season_bgs_score int (`previous_season_bgs_score` field)
+        current_season_powerplay_score int (`current_season_powerplay_score` field)
+        previous_season_powerplay_score int (`previous_season_powerplay_score` field)
+        current_season_aegis_score int (`current_season_aegis_score` field)
+        previous_season_aegis_score int (`previous_season_aegis_score` field)
+        inserted_timestamp datetime default current_timestamp
+
+3. news  # history of news is tracked by news_id so we don't need a news_history table
+        squad_id int (squadron id)
+        type_of_news text (one of "public_statements", "internal_statements", "recent_activities")
+        news_id int (id field)
+        date int (date field)
+        category text (category field. One of "Squadrons_History_Category_Membership",
+"Squadrons_History_Category_Leaderboards", "Squadrons_History_Category_BookmarkShare", "Squadrons_History_Category_Squadron",
+"Squadrons_History_Category_PublicStatement")
+        activity text (activity field)
+        season text (season field)
+        bookmark text (bookmark field)
+        motd text (motd field)
+        author text (author field)
+        cmdr_id int (cmdr_id field, for what and what is it??)
+        user_id int (user_id field)
+        inserted_timestamp datetime default current_timestamp
+
+implementation notes:
+1. If guilds stop their existing, then write a record to `squads_transactions` with fields as null except guild id
+
+
+legacy:
+request bearer token from capi.demb.design
+if there is no token -> exit
+loop:
+make request for latest known squadron + 1
+if +1 squad exists -> write it to db
+if new squad have appropriate tags -> report it
+goto loop

@@ -1,95 +1,95 @@
-# import json
+import json
 import requests
 import sqlite3
 import time
 import datetime
+import utils
+from EDMCLogging import get_main_logger
+import sql_requests
 
-"""
-request bearer token from capi.demb.design
-if there is no token -> exit
-loop:
-make request for latest known squadron + 1
-if +1 squad exists -> write it to db
-if new squad have appropriate tags -> report it
-goto loop
+logger = get_main_logger()
+db = sqlite3.connect('squads.sqlite')
 
+with open('sql_schema.sql', 'r', encoding='utf-8') as schema_file:
+    db.executescript(''.join(schema_file.readlines()))
 
-what to store?
-1. History of squadrons changes
-2. Current squadrons state
-    
-"""
-db = sqlite3.connect('db.sqlite')
-
-# SquadronTagCollections = json.load(open('available.json', 'r'))['SquadronTagData']['SquadronTagCollections']
 ruTag: int = 32
+BASE_URL = 'https://api.orerve.net/2.0/website/squadron/'
+INFO_ENDPOINT = 'info'
 
-hookURL = 'https://discord.com/api/webhooks/896514472280211477/LIKgbgNIr9Nvuc-1-FfylAIY1YV-a7RMjBlyBsVDellMbnokXLYKyBztY1P9Q0mabI6o'  # noqa: E501
 
-# let's get bearer token
-# https://api.orerve.net/2.0/website/squadron/info?platform=PC&squadronId=68879
-r = requests.get(url='https://capi.demb.design/users/InIMJmAy9I7XFHDoclQfxAwmPC9xbIwKPOzvGrrRA50=').json()
-bearer = r['access_token']
+def update_squad(squad_id: int, db_conn: sqlite3.Connection) -> bool:
+    r"""Update/insert information about squadron with specified id in our DB
 
-db.execute('create table if not exists squads (ownername text, id int, platform text, created text, created_ts '
-           'text, tag text, '
-           'inserted text, usertags text, name text, owner_id text);')
+    :param squad_id: id of squad to update/insert
+    :param db_conn: connection to sqlite DB
+    :return: True if squad exists, False if not
+    :rtype: bool
+    """
 
-try:
-    max_known_id: int = db.execute('select id from squads order by id desc limit 1').fetchone()[0]
-except TypeError:
-    max_known_id: int = 68862
+    """
+    How it should works?
+    Request squad's info
+    if squad exists FDEV
+        insert info in DB
+        request news, insert to DB
+        return True
+    
+    if squad doesn't exists FDEV
+        if squad in DB and isn't deleted
+            write to squads_states record with all null except ID (it will mean that squad was deleted)
+            
+       return False
+    *Should we return something more then just a bool, may be a message to notify_discord?
+    """
 
-first_retry: bool = True
+    squad_request: requests.Response = utils.authed_request(BASE_URL + INFO_ENDPOINT, params={'squadronId': squad_id})
 
-next_id = max_known_id + 1
-# print(f'continuing from {next_id}')
-while True:
-    r = requests.get(
-        url='https://api.orerve.net/2.0/website/squadron/info',
-        params={'squadronId': next_id},
-        headers={'Authorization': f'Bearer {bearer}'})
+    if squad_request.status_code == 200:  # squad exists FDEV
+        squad_request_json: dict = squad_request.json()['squadron']
+        with db_conn:
+            db_conn.execute(
+                sql_requests.insert_squad_states,
+                (
+                    squad_id,
+                    squad_request_json['name'],
+                    squad_request_json['tag'],
+                    utils.fdev2people(squad_request_json['ownerName']),
+                    squad_request_json['ownerId'],
+                    squad_request_json['platform'],
+                    squad_request_json['created'],
+                    squad_request_json['created_ts'],
+                    squad_request_json['acceptingNewMembers'],
+                    squad_request_json['powerId'],
+                    squad_request_json['powerName'],
+                    squad_request_json['superpowerId'],
+                    squad_request_json['superpowerName'],
+                    squad_request_json['factionId'],
+                    squad_request_json['factionName'],
+                    json.dumps(squad_request_json['userTags']),
+                    squad_request_json['memberCount'],
+                    squad_request_json['pendingCount'],
+                    squad_request_json['full'],
+                    squad_request_json['publicComms'],
+                    squad_request_json['publicCommsOverride'],
+                    squad_request_json['publicCommsAvailable'],
+                    squad_request_json['current_season_trade_score'],
+                    squad_request_json['previous_season_trade_score'],
+                    squad_request_json['current_season_combat_score'],
+                    squad_request_json['previous_season_combat_score'],
+                    squad_request_json['current_season_exploration_score'],
+                    squad_request_json['previous_season_exploration_score'],
+                    squad_request_json['current_season_cqc_score'],
+                    squad_request_json['previous_season_cqc_score'],
+                    squad_request_json['current_season_bgs_score'],
+                    squad_request_json['previous_season_bgs_score'],
+                    squad_request_json['current_season_powerplay_score'],
+                    squad_request_json['previous_season_powerplay_score'],
+                    squad_request_json['current_season_aegis_score'],
+                    squad_request_json['previous_season_aegis_score']
+                )
+            )
 
-    if r.status_code != 200:
-        if not first_retry:
-            break
 
-        else:
-            first_retry = False
-            next_id = next_id + 1
-            time.sleep(3)
-            continue
-
-    squad = r.json()['squadron']
-
-    squad['ownerName'] = bytes.fromhex(squad['ownerName']).decode('utf-8')
-
-    inserted = datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')  # in utc
-    db.execute('insert into squads '
-               '(id, platform, created, created_ts, tag, inserted, usertags, name, ownername, owner_id) values'
-               '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (squad['id'],
-                                                  squad['platform'],
-                                                  squad['created'],
-                                                  squad['created_ts'],
-                                                  squad['tag'],
-                                                  inserted,
-                                                  str(squad['userTags']),
-                                                  squad['name'],
-                                                  squad['ownerName'],
-                                                  squad['ownerId']))
-    db.commit()
-    print(squad)
-
-    if ruTag in squad['userTags']:
-        message = f"New RU squad: {squad['name']}\ntag: {squad['tag']}\ncreated: {squad['created']}\nplatform: " \
-                  f"{squad['platform']}\nowner name: {squad['ownerName']}\nmembers count: {squad['memberCount']}"
-        message = requests.utils.quote(message)
-        r2 = requests.post(url=hookURL, data=f'content={message}'.encode('utf-8'),
-                           headers={'Content-Type': 'application/x-www-form-urlencoded'})
-
-        if r2.status_code != 204:
-            print('send failed')
-
-    next_id = next_id + 1
-    first_retry = True
-    time.sleep(3)
+update_squad(65555, db)
+update_squad(65555, db)
