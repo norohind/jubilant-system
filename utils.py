@@ -164,6 +164,7 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
 
     """
     How it should works?
+    *properly delete squad in our DB mean write to squads_states record with all null except ID 
     Request squad's info
     
     if squad is properly deleted in our DB
@@ -177,9 +178,10 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
     if squad doesn't exists FDEV
         if squad in DB
             if isn't deleted in our DB
-                write to squads_states record with all null except ID (it will mean that squad was deleted)
+                 properly delete squad
+
         else if not suppress_absence
-            write to squads_states record with all null except ID (it will mean that squad was deleted)
+            properly delete squad
             
             
             

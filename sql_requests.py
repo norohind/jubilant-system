@@ -66,3 +66,8 @@ select_last_known_id: str = """select squad_id
 from squads_states 
 order by squad_id desc
 limit 1;"""
+
+select_squads_to_update: str = """select squad_id 
+from squads_states
+order by inserted_timestamp asc
+limit = ?;"""

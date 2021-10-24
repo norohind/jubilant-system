@@ -1,6 +1,7 @@
 import sqlite3
 import time
 
+import sql_requests
 import utils
 from EDMCLogging import get_main_logger
 
@@ -32,7 +33,6 @@ Two modes:
                 delete(failed_squad)
                 failed_squad = list()
         
-            
         else (fail)
             failed.append(id_to_try)
             tries = tries + 1
@@ -42,6 +42,10 @@ Two modes:
             
 2. Update exists
     get oldest updated existing squad
+    
+    if DB is empty
+        return
+        
     update it
     if squad still exists
         process triggers
@@ -53,10 +57,19 @@ def discover_triggers(squad_info: dict):
 
 
 def discover():
+    """Discover new squads
+
+    :return:
+    """
+
     id_to_try = utils.get_last_known_id(db)
     tries: int = 0
     failed: list = list()
     tries_limit: int = 5000
+    """
+    tries_limit, probably, should be something more smart because on retrospectively scan we can
+    have large spaces of dead squadrons but when we are discovering on real time, large value of tries_limit
+    will just waste our time and, probable, confuses FDEV"""
 
     while True:
         id_to_try = id_to_try + 1
@@ -77,7 +90,7 @@ def discover():
 
             failed = list()
 
-        else:  # should be only False
+        else:  # fail, should be only False
             logger.debug(f'Fail on discovery for {id_to_try} ID')
             failed.append(id_to_try)
             tries = tries + 1
@@ -86,3 +99,25 @@ def discover():
 
 
 discover()
+
+
+def update(squad_id: int = None, amount_to_update: int = 1):
+    """
+
+    :param squad_id: update specified squad, updates only that squad
+    :param amount_to_update: update specified amount, ignores when squad_id specified
+    :return:
+    """
+
+    if isinstance(squad_id, int):
+        logger.debug(f'Going to update one specified squadron: {squad_id} ID')
+        utils.update_squad_info(squad_id, db)
+        return
+
+    logger.debug(f'Going to update {amount_to_update} squadrons')
+    squads_id_to_update: list = db.execute(sql_requests.select_squads_to_update, (amount_to_update,)).fetchall()
+
+    for single_squad_to_update in squads_id_to_update:  # if db is empty, then loop will not happen
+        id_to_update: int = single_squad_to_update[0]
+        logger.debug(f'Updating {id_to_update}')
+        utils.update_squad_info(id_to_update, db)

@@ -72,6 +72,10 @@ DB tables
 implementation notes:
 1. If guilds stop their existing, then write a record to `squads_transactions` with fields as null except guild id
 
+hooks (don't mismatch with DB hooks)
+1. On properly_delete_squadron
+2. On insertion new data to squads_states (don't forget handle news)
+3.
 
 legacy:
 request bearer token from capi.demb.design
