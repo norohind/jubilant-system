@@ -74,8 +74,10 @@ implementation notes:
 
 hooks (don't mismatch with DB hooks)
 1. On properly_delete_squadron
+    NB: calls before make delete record
+
 2. On insertion new data to squads_states (don't forget handle news)
-3.
+    calls after insertion
 
 legacy:
 request bearer token from capi.demb.design

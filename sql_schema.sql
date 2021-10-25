@@ -44,7 +44,7 @@ from squads_states
 where inserted_timestamp in (
     select max(inserted_timestamp)
     from squads_states
-    group by squad_id)
+    group by squad_id) and tag is not null
 group by squad_id;
 
 create table if not exists news (

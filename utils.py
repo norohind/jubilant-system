@@ -3,6 +3,7 @@ from typing import Union
 import requests
 import json
 from EDMCLogging import get_main_logger
+import hooks
 import sql_requests
 
 logger = get_main_logger()
@@ -21,7 +22,13 @@ class FAPIUnknownStatusCode(Exception):
 
 
 def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
-    """Makes request to any url with valid bearer token"""
+    """Makes request to any url with valid bearer token
+
+    :param url: url to make request
+    :param method: method to make request, case insensitive, get by default
+    :param kwargs: will be passed to requests.request
+    :return: requests.Response object
+    """
     bearer: str = _get_bearer()
 
     logger.debug(f'Requesting {method.upper()} {url!r}, kwargs: {kwargs}')
@@ -43,7 +50,10 @@ def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response
 
 
 def _get_bearer() -> str:
-    """Gets bearer token from capi.demb.design (companion-api project)"""
+    """Gets bearer token from capi.demb.design (companion-api project)
+
+    :return: bearer token as str
+    """
     bearer_request: requests.Response = requests.get(
         url='https://capi.demb.design/users/2yGDATq_zzfudaQ_8XnFVKtE80gco1q1-2AkSL9gxoI=')
 
@@ -68,7 +78,7 @@ def notify_discord(message: str) -> None:
     logger.debug('Sending discord message')
 
     # hookURL: str = 'https://discord.com/api/webhooks/896514472280211477/LIKgbgNIr9Nvuc-1-FfylAIY1YV-a7RMjBlyBsVDellMbnokXLYKyBztY1P9Q0mabI6o'  # noqa: E501  # FBSC
-    hookURL: str = 'https://discord.com/api/webhooks/901531763740913775/McqeW4eattrCktrUo2XWhwaJO3POSjWbTb8BHeFAKrsTHOwc-r9rQ2zkFxtGZ1eQ_Ifd'  # noqa: E501  # dev
+    hookURL: str = 'https://discord.com/api/webhooks/902216904507260958/EIUwZ05r0_U2oa_xz8aVVEJyTC6DVk4ENxGYSde8ZNU7aMWBsc3Bo_gBis1_yUxJc3CC'  # noqa: E501  # dev FBSC
     content: bytes = f'content={requests.utils.quote(message)}'.encode('utf-8')
 
     if len(content) >= 2000:  # discord limitation
@@ -112,12 +122,17 @@ def _update_squad_news(squad_id: int, db_conn: sqlite3.Connection) -> Union[bool
         insert all news even if it already exist in DB
         return motd
     """
+
     news_request: requests.Response = authed_request(BASE_URL + NEWS_ENDPOINT, params={'squadronId': squad_id})
     if news_request.status_code != 200:  # must not happen
         logger.warning(f'Got not 200 status code on requesting news, content: {news_request.content}')
         # we will not break it, let next code break it by itself
 
     squad_news: dict = news_request.json()['squadron']
+
+    if isinstance(squad_news, list):  # check squadron 2517 for example 0_0
+        logger.info(f'squad_news is list for {squad_id}: {squad_news}')
+        return False
 
     if 'id' not in squad_news.keys():  # squadron doesn't FDEV
         return False
@@ -246,6 +261,8 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
             motd: str = _update_squad_news(squad_id, db_conn)  # yeah, it can return bool but never should does it
             squad_request_json.update(motd=motd)
 
+            hooks.notify_insert_data(squad_request_json, db_conn)  # call hook
+
             return squad_request_json
 
     elif squad_request.status_code == 404:  # squad doesn't exists FDEV
@@ -276,6 +293,8 @@ def properly_delete_squadron(squad_id: int, db_conn: sqlite3.Connection) -> None
     :return:
     """
     logger.debug(f'Properly deleting {squad_id}')
+
+    hooks.notify_properly_delete(squad_id, db_conn)
 
     with db_conn:
         db_conn.execute(sql_requests.properly_delete_squad, (squad_id,))

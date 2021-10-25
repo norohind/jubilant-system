@@ -52,10 +52,6 @@ Two modes:
 """
 
 
-def discover_triggers(squad_info: dict):
-    print(squad_info.get('name'), squad_info.get('tag'), squad_info.get('ownerName'))
-
-
 def discover():
     """Discover new squads
 
@@ -65,26 +61,37 @@ def discover():
     id_to_try = utils.get_last_known_id(db)
     tries: int = 0
     failed: list = list()
-    tries_limit: int = 5000
+    TRIES_LIMIT_RETROSPECTIVELY: int = 5000
+    TRIES_LIMIT_ON_THE_TIME: int = 5
+
+    def smart_tries_limit(squad_id: int) -> int:  # something smarter but still have to be better
+
+        if id_to_try < 65000:
+            return TRIES_LIMIT_RETROSPECTIVELY
+
+        else:
+            return TRIES_LIMIT_ON_THE_TIME
+
     """
     tries_limit, probably, should be something more smart because on retrospectively scan we can
     have large spaces of dead squadrons but when we are discovering on real time, large value of tries_limit
-    will just waste our time and, probable, confuses FDEV"""
+    will just waste our time and, probable, confuses FDEV
+    """
 
     while True:
         id_to_try = id_to_try + 1
-        logger.debug(f'Starting discover loop iteration, tries: {tries} of {tries_limit}, id to try {id_to_try}, '
-                     f'failed list: {failed}')
+        # logger.debug(f'Starting discover loop iteration, tries: {tries} of {tries_limit}, id to try {id_to_try}, '
+        #             f'failed list: {failed}')
 
-        if tries == tries_limit:
+        if tries == smart_tries_limit(id_to_try):
             break
 
         squad_info = utils.update_squad_info(id_to_try, db, suppress_absence=True)
 
         if isinstance(squad_info, dict):  # success
             logger.debug(f'Success discover for {id_to_try} ID')
-            discover_triggers(squad_info)
             tries = 0  # reset tries counter
+
             for failed_squad in failed:  # since we found an exists squad, then all previous failed wasn't exists
                 utils.properly_delete_squadron(failed_squad, db)
 
@@ -95,10 +102,7 @@ def discover():
             failed.append(id_to_try)
             tries = tries + 1
 
-        time.sleep(2)
-
-
-discover()
+        time.sleep(3)
 
 
 def update(squad_id: int = None, amount_to_update: int = 1):
@@ -121,3 +125,7 @@ def update(squad_id: int = None, amount_to_update: int = 1):
         id_to_update: int = single_squad_to_update[0]
         logger.debug(f'Updating {id_to_update}')
         utils.update_squad_info(id_to_update, db)
+        time.sleep(3)
+
+
+discover()
