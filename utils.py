@@ -309,3 +309,19 @@ def get_last_known_id(db_conn: sqlite3.Connection) -> int:
     else:
         logger.debug(f'last know id from DB: {sql_request_result[0]}')
         return sql_request_result[0]
+
+
+def get_next_hole_id_for_discover(db_conn: sqlite3.Connection) -> int:
+    """Returns first unexisting id in DB
+    :param db_conn:
+    :return: last known id if we iterate from 1 to ...
+    """
+
+    sql_req = db_conn.execute(sql_requests.select_first_hole_id).fetchone()
+    if sql_req is None:
+        logger.debug(f"Can't get last know id from DB, defaulting to 1")
+        return 1
+
+    else:
+        logger.debug(f'last know id from DB: {sql_req[0]}')
+        return sql_req[0]

@@ -56,7 +56,8 @@ def discover():
     :return:
     """
 
-    id_to_try = utils.get_last_known_id(db)
+    # id_to_try = utils.get_last_known_id(db)
+    # id_to_try = utils.get_next_id_for_discover(db) - 1
     tries: int = 0
     failed: list = list()
     TRIES_LIMIT_RETROSPECTIVELY: int = 5000
@@ -64,7 +65,7 @@ def discover():
 
     def smart_tries_limit(squad_id: int) -> int:  # something smarter but still have to be better
 
-        if id_to_try < 65000:
+        if squad_id < 65000:
             return TRIES_LIMIT_RETROSPECTIVELY
 
         else:
@@ -73,11 +74,12 @@ def discover():
     """
     tries_limit, probably, should be something more smart because on retrospectively scan we can
     have large spaces of dead squadrons but when we are discovering on real time, large value of tries_limit
-    will just waste our time and, probable, confuses FDEV
+    will just waste our time and, probable, confuses FDEV 
+    *Outdated but it still can be more smart*
     """
 
     while True:
-        id_to_try = id_to_try + 1
+        id_to_try = utils.get_next_hole_id_for_discover(db)
         # logger.debug(f'Starting discover loop iteration, tries: {tries} of {tries_limit}, id to try {id_to_try}, '
         #             f'failed list: {failed}')
 
