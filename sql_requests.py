@@ -69,5 +69,6 @@ limit 1;"""
 
 select_squads_to_update: str = """select squad_id 
 from squads_states
+where tag is not null 
 order by inserted_timestamp asc
-limit = ?;"""
+limit ?;"""

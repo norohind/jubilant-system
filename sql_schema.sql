@@ -61,3 +61,13 @@ author text,
 cmdr_id int,
 user_id int,
 inserted_timestamp datetime default current_timestamp);
+
+create view if not exists news_view
+as
+select *
+from news
+where inserted_timestamp in (
+    select max(inserted_timestamp)
+    from news
+    group by squad_id)
+group by squad_id;

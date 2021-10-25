@@ -1,6 +1,6 @@
 import sqlite3
 import time
-
+import sys
 import sql_requests
 import utils
 from EDMCLogging import get_main_logger
@@ -10,8 +10,6 @@ db = sqlite3.connect('squads.sqlite')
 
 with open('sql_schema.sql', 'r', encoding='utf-8') as schema_file:
     db.executescript(''.join(schema_file.readlines()))
-
-ruTag: id = 32
 
 """
 Two modes:
@@ -123,9 +121,77 @@ def update(squad_id: int = None, amount_to_update: int = 1):
 
     for single_squad_to_update in squads_id_to_update:  # if db is empty, then loop will not happen
         id_to_update: int = single_squad_to_update[0]
-        logger.debug(f'Updating {id_to_update}')
+        logger.debug(f'Updating {id_to_update} ID')
         utils.update_squad_info(id_to_update, db)
         time.sleep(3)
 
 
-discover()
+if __name__ == '__main__':
+
+    def help_cli() -> str:
+        return """Possible arguments:
+    main.py discover
+    main.py update
+    main.py update amount <amount: int>
+    main.py update id <id: int>"""
+
+    logger.debug(f'argv: {sys.argv}')
+
+    if len(sys.argv) == 1:
+        print(help_cli())
+        exit(1)
+
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == 'discover':
+            # main.py discover
+            logger.info(f'Entering discover mode')
+            discover()
+            exit(0)
+
+        elif sys.argv[1] == 'update':
+            # main.py update
+            logger.info(f'Entering common update mode')
+            update()
+            exit(0)
+
+        else:
+            print(help_cli())
+            exit(1)
+
+    elif len(sys.argv) == 4:
+        if sys.argv[1] == 'update':
+            if sys.argv[2] == 'amount':
+                # main.py update amount <amount: int>
+
+                try:
+                    amount: int = int(sys.argv[3])
+                    logger.info(f'Entering update amount mode, amount: {amount}')
+                    update(amount_to_update=amount)
+                    exit(0)
+
+                except ValueError:
+                    print('Amount must be integer')
+                    exit(1)
+
+            elif sys.argv[2] == 'id':
+                # main.py update id <id: int>
+                try:
+                    id_for_update: int = int(sys.argv[3])
+                    logger.info(f'Entering update specified squad: {id_for_update} ID')
+                    update(squad_id=id_for_update)
+                    exit(0)
+
+                except ValueError:
+                    print('ID must be integer')
+                    exit(1)
+
+            else:
+                logger.info(f'Unknown argument {sys.argv[2]}')
+
+    else:
+        print(help_cli())
+        exit(1)
+
+
+
+
