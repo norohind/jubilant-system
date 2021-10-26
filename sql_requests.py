@@ -79,3 +79,22 @@ from squads_states except
     from squads_states 
     order by a asc 
     limit 1;"""
+
+select_old_new: str = """select {column}
+from squads_states
+where squad_id = ?
+order by inserted_timestamp desc
+limit 2;"""
+
+# AAAAAAAAA, it require to do something with it
+select_old_new_news: str = """select {column} 
+from squads_states inner join news on
+    squads_states.squad_id = news.squad_id
+     and substr(squads_states.inserted_timestamp, 1, 16) = substr(news.inserted_timestamp, 1, 16) 
+where category = 'Squadrons_History_Category_PublicStatement' and squads_states.squad_id = ? 
+order by squads_states.inserted_timestamp
+limit 2;"""
+
+select_important_before_delete: str = """select name, platform, member_count, tag, user_tags 
+from squads_view 
+where squad_id = ?;"""
