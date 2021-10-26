@@ -261,3 +261,4 @@ def old_new_news(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typ
 
 insert_data_hooks.append(detect_new_ru_squads)
 insert_data_hooks.append(detect_important_changes_ru_squads)
+properly_delete_hooks.append(detect_removing_ru_squads)
