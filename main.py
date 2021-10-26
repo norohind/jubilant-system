@@ -19,6 +19,7 @@ TODO:
 1. Hooks for update
 2. Tags resolver
 3. Proper shutdown
+4. capi.demb.design special api
 
 Two modes:
 1. Discover new squads
@@ -147,7 +148,8 @@ def update(squad_id: int = None, amount_to_update: int = 1):
 
         id_to_update: int = single_squad_to_update[0]
         logger.debug(f'Updating {id_to_update} ID')
-        utils.update_squad_info(id_to_update, db)
+        utils.update_squad_info(id_to_update, db, suppress_absence=True)
+        # suppress_absence is required because if we updating squad with some high id it may just don't exists yet
         time.sleep(3)
 
 
