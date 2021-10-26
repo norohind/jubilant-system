@@ -12,6 +12,11 @@ with open('sql_schema.sql', 'r', encoding='utf-8') as schema_file:
     db.executescript(''.join(schema_file.readlines()))
 
 """
+TODO:
+1. Hooks for update
+2. Tags resolver
+3. Proper shutdown
+
 Two modes:
 1. Discover new squads
     get last_known_id
