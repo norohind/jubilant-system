@@ -323,5 +323,5 @@ def get_next_hole_id_for_discover(db_conn: sqlite3.Connection) -> int:
         return 1
 
     else:
-        logger.debug(f'last know id from DB: {sql_req[0]}')
+        logger.debug(f'Next unknown id from DB: {sql_req[0]}')
         return sql_req[0]
