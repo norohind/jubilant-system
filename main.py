@@ -58,6 +58,7 @@ def discover():
 
     # id_to_try = utils.get_last_known_id(db)
     # id_to_try = utils.get_next_id_for_discover(db) - 1
+    id_to_try = utils.get_next_hole_id_for_discover(db) - 1
     tries: int = 0
     failed: list = list()
     TRIES_LIMIT_RETROSPECTIVELY: int = 5000
@@ -79,7 +80,7 @@ def discover():
     """
 
     while True:
-        id_to_try = utils.get_next_hole_id_for_discover(db)
+        id_to_try = id_to_try + 1
         # logger.debug(f'Starting discover loop iteration, tries: {tries} of {tries_limit}, id to try {id_to_try}, '
         #             f'failed list: {failed}')
 
