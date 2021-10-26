@@ -4,12 +4,15 @@ import sys
 import sql_requests
 import utils
 from EDMCLogging import get_main_logger
+import signal
 
 logger = get_main_logger()
 db = sqlite3.connect('squads.sqlite')
 
 with open('sql_schema.sql', 'r', encoding='utf-8') as schema_file:
     db.executescript(''.join(schema_file.readlines()))
+
+shutting_down: bool = False
 
 """
 TODO:
@@ -55,6 +58,12 @@ Two modes:
 """
 
 
+def shutdown_callback(sig, frame) -> None:
+    logger.info(f'Planning shutdown by {sig} signal')
+    global shutting_down
+    shutting_down = True
+
+
 def discover():
     """Discover new squads
 
@@ -85,6 +94,10 @@ def discover():
     """
 
     while True:
+
+        if shutting_down:
+            return
+
         id_to_try = id_to_try + 1
         # logger.debug(f'Starting discover loop iteration, tries: {tries} of {tries_limit}, id to try {id_to_try}, '
         #             f'failed list: {failed}')
@@ -128,6 +141,10 @@ def update(squad_id: int = None, amount_to_update: int = 1):
     squads_id_to_update: list = db.execute(sql_requests.select_squads_to_update, (amount_to_update,)).fetchall()
 
     for single_squad_to_update in squads_id_to_update:  # if db is empty, then loop will not happen
+
+        if shutting_down:
+            return
+
         id_to_update: int = single_squad_to_update[0]
         logger.debug(f'Updating {id_to_update} ID')
         utils.update_squad_info(id_to_update, db)
@@ -135,6 +152,9 @@ def update(squad_id: int = None, amount_to_update: int = 1):
 
 
 if __name__ == '__main__':
+
+    signal.signal(signal.SIGTERM, shutdown_callback)
+    signal.signal(signal.SIGINT, shutdown_callback)
 
     def help_cli() -> str:
         return """Possible arguments:
