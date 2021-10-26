@@ -135,7 +135,8 @@ def update(squad_id: int = None, amount_to_update: int = 1):
 
     if isinstance(squad_id, int):
         logger.debug(f'Going to update one specified squadron: {squad_id} ID')
-        utils.update_squad_info(squad_id, db)
+        utils.update_squad_info(squad_id, db, suppress_absence=True)
+        # suppress_absence is required because if we updating squad with some high id it may just don't exists yet
         return
 
     logger.debug(f'Going to update {amount_to_update} squadrons')
@@ -148,8 +149,7 @@ def update(squad_id: int = None, amount_to_update: int = 1):
 
         id_to_update: int = single_squad_to_update[0]
         logger.debug(f'Updating {id_to_update} ID')
-        utils.update_squad_info(id_to_update, db, suppress_absence=True)
-        # suppress_absence is required because if we updating squad with some high id it may just don't exists yet
+        utils.update_squad_info(id_to_update, db)
         time.sleep(3)
 
 
