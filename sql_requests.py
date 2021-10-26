@@ -68,7 +68,7 @@ order by squad_id desc
 limit 1;"""
 
 select_squads_to_update: str = """select squad_id 
-from squads_states
+from squads_view
 where tag is not null 
 order by inserted_timestamp asc
 limit ?;"""
