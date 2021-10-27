@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from typing import Union
 import requests
@@ -55,7 +56,7 @@ def _get_bearer() -> str:
     :return: bearer token as str
     """
     bearer_request: requests.Response = requests.get(
-        url='https://capi.demb.design/users/2yGDATq_zzfudaQ_8XnFVKtE80gco1q1-2AkSL9gxoI=')
+        url='https://capi.demb.design/random_token', headers={'auth': os.environ['DEMB_CAPI_AUTH']})
 
     try:
         bearer: str = bearer_request.json()['access_token']
