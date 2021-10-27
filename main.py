@@ -16,10 +16,13 @@ shutting_down: bool = False
 
 """
 TODO:
-1. Hooks for update
+1. Hooks for update (done)
 2. Tags resolver
-3. Proper shutdown
+3. Proper shutdown (done)
 4. capi.demb.design special api
+5. FID tracking system
+
+=========================DONT RELAY ON news_view=========================
 
 Two modes:
 1. Discover new squads
