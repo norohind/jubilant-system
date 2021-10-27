@@ -282,7 +282,7 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
 
     else:  # any other codes (except 418, that one handles in authed_request), never should happen
         logger.warning(f'Unknown squad info status_code: {squad_request.status_code}, content: {squad_request.content}')
-        raise FAPIUnknownStatusCode
+        raise FAPIUnknownStatusCode(f'Status code: {squad_request.status_code}, content: {squad_request.content}')
 
 
 def properly_delete_squadron(squad_id: int, db_conn: sqlite3.Connection) -> None:
