@@ -1,10 +1,11 @@
+import signal
 import sqlite3
-import time
 import sys
+import time
+
 import sql_requests
 import utils
 from EDMCLogging import get_main_logger
-import signal
 
 logger = get_main_logger()
 db = sqlite3.connect('squads.sqlite')

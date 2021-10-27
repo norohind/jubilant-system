@@ -6,9 +6,10 @@ common structure:
 
 Should we have separate triggers for update and insert cases?
 """
+import json
 import sqlite3
 import typing
-import json
+
 import sql_requests
 import utils
 from EDMCLogging import get_main_logger

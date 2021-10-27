@@ -1,11 +1,13 @@
+import json
 import os
 import sqlite3
 from typing import Union
+
 import requests
-import json
-from EDMCLogging import get_main_logger
+
 import hooks
 import sql_requests
+from EDMCLogging import get_main_logger
 
 logger = get_main_logger()
 
