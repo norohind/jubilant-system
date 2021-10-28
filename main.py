@@ -22,6 +22,7 @@ TODO:
 3. Proper shutdown (done)
 4. capi.demb.design special api
 5. FID tracking system
+6. Log level as argument
 
 =========================DONT RELAY ON news_view=========================
 
@@ -126,8 +127,6 @@ def discover():
             failed.append(id_to_try)
             tries = tries + 1
 
-        time.sleep(3)
-
 
 def update(squad_id: int = None, amount_to_update: int = 1):
     """
@@ -154,7 +153,6 @@ def update(squad_id: int = None, amount_to_update: int = 1):
         id_to_update: int = single_squad_to_update[0]
         logger.debug(f'Updating {id_to_update} ID')
         utils.update_squad_info(id_to_update, db)
-        time.sleep(3)
 
 
 if __name__ == '__main__':

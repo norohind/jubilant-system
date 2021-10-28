@@ -1,6 +1,7 @@
 import json
 import os
 import sqlite3
+import time
 from typing import Union
 
 import requests
@@ -15,6 +16,12 @@ BASE_URL = 'https://api.orerve.net/2.0/website/squadron/'
 INFO_ENDPOINT = 'info'
 NEWS_ENDPOINT = 'news/list'
 
+# proxy: last request time
+# ssh -C2 -T -n -N -D 2081 patagonia
+PROXIES_DICT: list[dict] = [{'url': 'socks5://127.0.0.1:2080', 'last_req': int(time.time())},
+                            {'url': 'socks5://127.0.0.1:2081', 'last_req': int(time.time())},
+                            {'url': None, 'last_req': int(time.time())}]
+
 
 class FAPIDownForMaintenance(Exception):
     pass
@@ -22,6 +29,58 @@ class FAPIDownForMaintenance(Exception):
 
 class FAPIUnknownStatusCode(Exception):
     pass
+
+
+def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
+    """Makes request through one of proxies in round robin manner, respects fdev request kd for every proxy
+
+    :param url: url to request
+    :param method: method to use in request
+    :param kwargs: kwargs
+    :return: requests.Response object
+
+    detect oldest used proxy
+    detect how many we have to sleep to respect it 3 sec timeout for each proxy
+    sleep it
+    perform request with it
+    update last_req
+
+    """
+    global PROXIES_DICT
+
+    TIME_BETWEEN_REQUESTS: int = 3
+
+    selected_proxy = min(PROXIES_DICT, key=lambda x: x['last_req'])
+
+    logger.debug(f'Using {selected_proxy["url"]} proxy')
+
+    # let's detect how much we have to wait
+    time_to_sleep: int = int(time.time()) - selected_proxy['last_req']
+
+    if 0 < time_to_sleep <= TIME_BETWEEN_REQUESTS:
+        logger.debug(f'Sleeping {time_to_sleep} s')
+        time.sleep(time_to_sleep)
+
+    if selected_proxy['url'] is None:
+        proxies: dict = None  # noqa
+
+    else:
+        proxies: dict = {'https': selected_proxy['url']}
+
+    proxiedFapiRequest: requests.Response = requests.request(
+        method=method,
+        url=url,
+        proxies=proxies,
+        **kwargs
+    )
+
+    for i, proxy in enumerate(PROXIES_DICT):
+        if proxy['url'] == selected_proxy["url"]:
+            PROXIES_DICT[i]['last_req'] = int(time.time())
+
+            break
+
+    return proxiedFapiRequest
 
 
 def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
@@ -32,11 +91,17 @@ def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response
     :param kwargs: will be passed to requests.request
     :return: requests.Response object
     """
+
+    """
+    Proxies support
+    We want to respect 3 sec limit for every proxy
+    
+    """
     bearer: str = _get_bearer()
 
     logger.debug(f'Requesting {method.upper()} {url!r}, kwargs: {kwargs}')
 
-    fapiRequest: requests.Response = requests.request(
+    fapiRequest: requests.Response = proxied_request(
         method=method,
         url=url,
         headers={'Authorization': f'Bearer {bearer}'},
