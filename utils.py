@@ -18,9 +18,9 @@ NEWS_ENDPOINT = 'news/list'
 
 # proxy: last request time
 # ssh -C2 -T -n -N -D 2081 patagonia
-PROXIES_DICT: list[dict] = [{'url': 'socks5://127.0.0.1:2080', 'last_req': time.time()},
-                            {'url': 'socks5://127.0.0.1:2081', 'last_req': time.time()},
-                            {'url': None, 'last_req': time.time()}]
+PROXIES_DICT: list[dict] = [{'url': 'socks5://127.0.0.1:2080', 'last_req': 0},
+                            {'url': 'socks5://127.0.0.1:2081', 'last_req': 0},
+                            {'url': None, 'last_req': 0}]
 
 
 class FAPIDownForMaintenance(Exception):
@@ -55,7 +55,7 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
     logger.debug(f'Using {selected_proxy["url"]} proxy')
 
     # let's detect how much we have to wait
-    time_to_sleep: float = time.time() - selected_proxy['last_req']
+    time_to_sleep: float = (selected_proxy['last_req'] + TIME_BETWEEN_REQUESTS) - time.time()
 
     if 0 < time_to_sleep <= TIME_BETWEEN_REQUESTS:
         logger.debug(f'Sleeping {time_to_sleep} s')
