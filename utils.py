@@ -18,9 +18,7 @@ NEWS_ENDPOINT = 'news/list'
 
 # proxy: last request time
 # ssh -C2 -T -n -N -D 2081 patagonia
-PROXIES_DICT: list[dict] = [{'url': 'socks5://127.0.0.1:2080', 'last_req': 0},
-                            {'url': 'socks5://127.0.0.1:2081', 'last_req': 0},
-                            {'url': None, 'last_req': 0}]
+PROXIES_DICT: list[dict] = json.load(open('proxies.json', 'r'))
 
 
 class FAPIDownForMaintenance(Exception):
@@ -40,51 +38,65 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
     :return: requests.Response object
 
     detect oldest used proxy
+    if selected proxy is banned, then switch to next
     detect how many we have to sleep to respect it 3 sec timeout for each proxy
     sleep it
     perform request with it
-    update last_req
-
+    if request failed -> write last_try for current proxy and try next proxy
     """
+
     global PROXIES_DICT
 
     TIME_BETWEEN_REQUESTS: float = 3.0
 
-    selected_proxy = min(PROXIES_DICT, key=lambda x: x['last_req'])
+    while True:
 
-    logger.debug(f'Using {selected_proxy["url"]} proxy')
+        selected_proxy = min(PROXIES_DICT, key=lambda x: x['last_try'])
+        logger.debug(f'Requesting {method.upper()} {url!r}, kwargs: {kwargs}; Using {selected_proxy["url"]} proxy')
 
-    # let's detect how much we have to wait
-    time_to_sleep: float = (selected_proxy['last_req'] + TIME_BETWEEN_REQUESTS) - time.time()
+        # let's detect how much we have to wait
+        time_to_sleep: float = (selected_proxy['last_try'] + TIME_BETWEEN_REQUESTS) - time.time()
 
-    if 0 < time_to_sleep <= TIME_BETWEEN_REQUESTS:
-        logger.debug(f'Sleeping {time_to_sleep} s')
-        time.sleep(time_to_sleep)
+        if 0 < time_to_sleep <= TIME_BETWEEN_REQUESTS:
+            logger.debug(f'Sleeping {time_to_sleep} s')
+            time.sleep(time_to_sleep)
 
-    if selected_proxy['url'] is None:
-        proxies: dict = None  # noqa
+        if selected_proxy['url'] is None:
+            proxies: dict = None  # noqa
 
-    else:
-        proxies: dict = {'https': selected_proxy['url']}
+        else:
+            proxies: dict = {'https': selected_proxy['url']}
 
-    proxiedFapiRequest: requests.Response = requests.request(
-        method=method,
-        url=url,
-        proxies=proxies,
-        **kwargs
-    )
+        try:
+            proxiedFapiRequest: requests.Response = requests.request(
+                method=method,
+                url=url,
+                proxies=proxies,
+                headers={'Authorization': f'Bearer {_get_bearer()}'},
+                **kwargs
+            )
 
-    for i, proxy in enumerate(PROXIES_DICT):
-        if proxy['url'] == selected_proxy["url"]:
-            PROXIES_DICT[i]['last_req'] = time.time()
+            logger.debug(f'Request complete, code {proxiedFapiRequest.status_code!r}, len '
+                         f'{len(proxiedFapiRequest.content)}')
 
-            break
+        except requests.exceptions.ConnectionError as e:
+            logger.exception(f'Proxy {selected_proxy["url"]} is invalid', exc_info=e)
+            selected_proxy['last_try'] = time.time()  # because link, lol
+            continue
 
-    return proxiedFapiRequest
+        selected_proxy['last_try'] = time.time()  # because link, lol
+
+        if proxiedFapiRequest.request == 418:  # FAPI is on maintenance
+            logger.warning(f'{method.upper()} {proxiedFapiRequest.url} returned 418, content dump:\n'
+                           f'{proxiedFapiRequest.content}')
+
+            raise FAPIDownForMaintenance
+
+        return proxiedFapiRequest
 
 
 def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
-    """Makes request to any url with valid bearer token
+    """Deprecated and will be removed; Makes request to any url with valid bearer token
 
     :param url: url to make request
     :param method: method to make request, case insensitive, get by default
@@ -92,11 +104,6 @@ def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response
     :return: requests.Response object
     """
 
-    """
-    Proxies support
-    We want to respect 3 sec limit for every proxy
-    
-    """
     bearer: str = _get_bearer()
 
     logger.debug(f'Requesting {method.upper()} {url!r}, kwargs: {kwargs}')
@@ -191,7 +198,7 @@ def _update_squad_news(squad_id: int, db_conn: sqlite3.Connection) -> Union[bool
         return motd
     """
 
-    news_request: requests.Response = authed_request(BASE_URL + NEWS_ENDPOINT, params={'squadronId': squad_id})
+    news_request: requests.Response = proxied_request(BASE_URL + NEWS_ENDPOINT, params={'squadronId': squad_id})
     if news_request.status_code != 200:  # must not happen
         logger.warning(f'Got not 200 status code on requesting news, content: {news_request.content}')
         # we will not break it, let next code break it by itself
@@ -277,7 +284,7 @@ def update_squad_info(squad_id: int, db_conn: sqlite3.Connection, suppress_absen
         logger.debug(f'squad {squad_id} is marked as deleted in our DB, returning False')
         return False
 
-    squad_request: requests.Response = authed_request(BASE_URL + INFO_ENDPOINT, params={'squadronId': squad_id})
+    squad_request: requests.Response = proxied_request(BASE_URL + INFO_ENDPOINT, params={'squadronId': squad_id})
 
     if squad_request.status_code == 200:  # squad exists FDEV
         squad_request_json: dict = squad_request.json()['squadron']
