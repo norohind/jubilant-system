@@ -95,6 +95,6 @@ where category = 'Squadrons_History_Category_PublicStatement' and squads_states.
 order by squads_states.inserted_timestamp
 limit 2;"""
 
-select_important_before_delete: str = """select name, platform, member_count, tag, user_tags 
+select_important_before_delete: str = """select name, platform, member_count, tag, user_tags, created 
 from squads_view 
 where squad_id = ?;"""
