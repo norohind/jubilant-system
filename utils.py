@@ -18,7 +18,11 @@ NEWS_ENDPOINT = 'news/list'
 
 # proxy: last request time
 # ssh -C2 -T -n -N -D 2081 patagonia
-PROXIES_DICT: list[dict] = json.load(open('proxies.json', 'r'))
+try:
+    PROXIES_DICT: list[dict] = json.load(open('proxies.json', 'r'))
+
+except FileNotFoundError:
+    PROXIES_DICT: list[dict] = [{'url': None, 'last_try': 0}]
 
 
 class FAPIDownForMaintenance(Exception):
