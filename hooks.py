@@ -116,10 +116,11 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
     how it should works?
     Works only with updated (not firstly inserted) squads
     1. Detect if squad just set/took ru tag
-    2. Detect if squad changed members count
-    3. Detect if squad changed motd
-    4. Detect if squad changed ownership
-    5. Notify discord
+    2. Detect if squad changed their members count
+    3. Detect if squad changed their motd
+    4. Detect if squad changed their ownership
+    5. Detect if squad changed their minor faction
+    6. Notify discord
     """
 
     squad_id = squad_info['id']
@@ -127,9 +128,9 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         # we just discover squad, not updating
         return
 
-    new, old = old_new('user_tags', db_conn, squad_id)
-    new_tags: list = json.loads(new)
-    old_tags: list = json.loads(old)
+    new_tags_raw, old_tags_raw = new_old_diff('user_tags', db_conn, squad_id)
+    new_tags: list = json.loads(new_tags_raw)
+    old_tags: list = json.loads(old_tags_raw)
 
     message: str = str()
 
@@ -151,7 +152,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message = message + 'Squadron stop being russian\n'
 
     # let's clarify situation with members count
-    new_members, old_members = old_new('member_count', db_conn, squad_id)
+    new_members, old_members = new_old_diff('member_count', db_conn, squad_id)
 
     if new_members == old_members:
         # count wasn't changed
@@ -161,7 +162,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message = message + f'Members count changed {old_members} -> {new_members}\n'
 
     # let's check motd
-    new_motd, old_motd = old_new_news('motd', db_conn, squad_id)  # TODO: make easier and better
+    new_motd, old_motd = new_old_news_diff('motd', db_conn, squad_id)  # TODO: make easier and better
 
     if new_motd == old_motd:
         # motd wasn't changed
@@ -171,7 +172,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message = message + f'Motd changed, old:\n```\n{old_motd}\n```\nnew:\n```\n{new_motd}\n```\n'
 
     # let's check ownership
-    new_owner, old_owner = old_new('owner_name', db_conn, squad_id)
+    new_owner, old_owner = new_old_diff('owner_name', db_conn, squad_id)
 
     if new_owner == old_owner:
         # the same owner
@@ -180,9 +181,19 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
     else:
         message = message + f'Ownership changed: {old_owner} -> {new_owner}\n'
 
+    # let's check minor faction
+    new_faction, old_faction = new_old_diff('faction_name', db_conn, squad_id)
+
+    if new_faction == old_faction:
+        # the same faction
+        pass
+
+    else:
+        message = message + f'Minor faction changed: {old_faction} -> {new_faction}\n'
+
     if len(message) != 0:
         utils.notify_discord(f'State changing for `{squad_info["name"]}`\n'
-                             f'platform: {squad_info["platform"]}\n' + message)
+                             f'platform: {squad_info["platform"]}\nmembers: {squad_info["memberCount"]}\n' + message)
 
     return
 
@@ -219,7 +230,7 @@ def detect_removing_ru_squads(squad_id: int, db_conn: sqlite3.Connection):
 
 
 # should I move it to utils?
-def old_new(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typing.Tuple[typing.Any, typing.Any]:
+def new_old_diff(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typing.Tuple[typing.Any, typing.Any]:
     """Returns last two record for squad_id for specified column
 
     :param column:
@@ -235,7 +246,7 @@ def old_new(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typing.T
     return new, old
 
 
-def old_new_news(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typing.Tuple[typing.Any, typing.Any]:
+def new_old_news_diff(column: str, db_conn: sqlite3.Connection, squad_id: int) -> typing.Tuple[typing.Any, typing.Any]:
     """Returns last two record for squad_id for specified column
 
     :param column:
