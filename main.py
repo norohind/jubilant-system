@@ -197,13 +197,21 @@ if __name__ == '__main__':
             logger.info('Entering daemon mode')
             while True:
                 can_be_shutdown = False
+
                 update(amount_to_update=500)
+                if shutting_down:
+                    exit(0)
+
                 logger.debug('Updated, sleeping')
                 can_be_shutdown = True
                 time.sleep(30 * 60)
                 can_be_shutdown = False
                 logger.debug('Discovering')
+
                 discover()
+                if shutting_down:
+                    exit(0)
+
                 logger.debug('Discovered, sleeping')
                 can_be_shutdown = True
                 time.sleep(30 * 60)
