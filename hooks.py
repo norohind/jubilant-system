@@ -192,7 +192,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message = message + f'Minor faction changed: {old_faction} -> {new_faction}\n'
 
     if len(message) != 0:
-        utils.notify_discord(f'State changing for `{squad_info["name"]}`\n'
+        utils.notify_discord(f'State changing for `{squad_info["name"]}` {squad_info["tag"]}\n'
                              f'platform: {squad_info["platform"]}\nmembers: {squad_info["memberCount"]}\n'
                              f'created: {squad_info["created"]}\n' + message)
 
