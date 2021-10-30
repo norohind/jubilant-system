@@ -14,6 +14,7 @@ with open('sql_schema.sql', 'r', encoding='utf-8') as schema_file:
     db.executescript(''.join(schema_file.readlines()))
 
 shutting_down: bool = False
+can_be_shutdown: bool = False
 
 """
 TODO:
@@ -68,6 +69,10 @@ def shutdown_callback(sig, frame) -> None:
     logger.info(f'Planning shutdown by {sig} signal')
     global shutting_down
     shutting_down = True
+
+    if can_be_shutdown:
+        logger.info('Can be shutdown')
+        exit(0)
 
 
 def discover():
@@ -165,7 +170,8 @@ if __name__ == '__main__':
     main.py discover
     main.py update
     main.py update amount <amount: int>
-    main.py update id <id: int>"""
+    main.py update id <id: int>
+    main.py daemon"""
 
     logger.debug(f'argv: {sys.argv}')
 
@@ -185,6 +191,22 @@ if __name__ == '__main__':
             logger.info(f'Entering common update mode')
             update()
             exit(0)
+
+        elif sys.argv[1] == 'daemon':
+            # main.py daemon
+            logger.info('Entering daemon mode')
+            while True:
+                can_be_shutdown = False
+                update(amount_to_update=500)
+                logger.debug('Updated, sleeping')
+                can_be_shutdown = True
+                time.sleep(30 * 60)
+                can_be_shutdown = False
+                logger.debug('Discovering')
+                discover()
+                logger.debug('Discovered, sleeping')
+                can_be_shutdown = True
+                time.sleep(30 * 60)
 
         else:
             print(help_cli())
