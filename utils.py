@@ -404,3 +404,48 @@ def get_next_hole_id_for_discover(db_conn: sqlite3.Connection) -> int:
     else:
         logger.debug(f'Next unknown id from DB: {sql_req[0]}')
         return sql_req[0]
+
+
+def resolve_user_tags(user_tags: list[int]) -> dict[str, list[str]]:
+    """Function to resolve user_tags list of ints to dict with tag collections as keys and list of tags as value
+
+    :param user_tags: list of ints of tags to resolve
+    :return: dict of tags
+    """
+    with open('available.json', 'r', encoding='utf-8') as available_file:
+        available = json.load(available_file)
+
+    tag_collections: dict = available['SquadronTagData']['SquadronTagCollections']
+    _resolved_tags: dict[str, list[str]] = dict()
+
+    def resolve_user_tag(single_user_tag: int) -> [str, str]:
+        for tag_collection in tag_collections:
+            for tag in tag_collection['SquadronTags']:
+                if tag['ServerUniqueId'] == single_user_tag:
+                    return tag_collection['localisedCollectionName'], tag['LocalisedString']
+
+    for user_tag in user_tags:
+        collection_name, tag_name = resolve_user_tag(user_tag)
+        if collection_name in _resolved_tags:  # if key in dict
+            _resolved_tags[collection_name].append(tag_name)
+
+        else:
+            _resolved_tags.update({collection_name: [tag_name]})
+
+    return _resolved_tags
+
+
+def humanify_resolved_user_tags(user_tags: dict[str, list[str]]) -> str:
+    """Function to make result of resolve_user_tags more human readable
+
+    :param user_tags: result of resolve_user_tags function
+    :return: string with human-friendly tags list
+    """
+    result_str: str = str()
+    for tag_collection_name in user_tags:
+        result_str += f"{tag_collection_name}:\n"
+
+        for tag in user_tags[tag_collection_name]:
+            result_str += f"\t{tag}\n"
+
+    return result_str
