@@ -96,6 +96,7 @@ tag: {squad_info['tag']}
 created: {squad_info['created']}
 platform: {squad_info['platform']}
 owner: {squad_info['ownerName']}
+tags:\n{utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad_info['userTags']))}
 activity:
     previous season sum: {previous_season_sum}
     current season sum: {current_season_sum}
@@ -120,7 +121,8 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
     3. Detect if squad changed their motd
     4. Detect if squad changed their ownership
     5. Detect if squad changed their minor faction
-    6. Notify discord
+    6. Tags changes
+    7. Notify discord
     """
 
     squad_id = squad_info['id']
@@ -190,6 +192,18 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
 
     else:
         message = message + f'Minor faction changed: {old_faction} -> {new_faction}\n'
+
+    # let's check tags changes
+    new_tags_raw, old_tags_raw = new_old_diff('user_tags', db_conn, squad_id)
+    new_tags: list = json.loads(new_tags_raw)
+    old_tags: list = json.loads(old_tags_raw)
+
+    if new_tags == old_tags:
+        # nothing changed
+        pass
+
+    else:
+        message += f"```diff\n{tags_diff2str(new_tags, old_tags)}```"
 
     if len(message) != 0:
         utils.notify_discord(f'State changing for `{squad_info["name"]}` {squad_info["tag"]}\n'
@@ -271,6 +285,36 @@ def new_old_news_diff(column: str, db_conn: sqlite3.Connection, squad_id: int) -
         old = None
 
     return new, old
+
+
+def tags_diff2str(new_tags_ids: list, old_tags_ids: list) -> str:
+    """Compares two list of tags, new and old, and returns it in diff like str
+
+    :param new_tags_ids: list ids of new tags
+    :param old_tags_ids: list ids of old tags
+    :return: diff like str
+    """
+
+    resolved_tags: dict[str, list[str]] = dict()
+
+    removed_tags_ids: list = list(set(old_tags_ids) - set(new_tags_ids))
+    added_tags_ids: list = list(set(new_tags_ids) - set(old_tags_ids))
+
+    tags_union_ids: list = list(set(new_tags_ids).union(set(old_tags_ids)))
+
+    for tag_id in tags_union_ids:
+        collection_name, tag_name = utils.resolve_user_tag(tag_id)
+
+        if tag_id in removed_tags_ids:
+            resolved_tags = utils.append_to_list_in_dict(resolved_tags, collection_name, f'-   {tag_name}')
+
+        elif tag_id in added_tags_ids:
+            resolved_tags = utils.append_to_list_in_dict(resolved_tags, collection_name, f'+   {tag_name}')
+
+        else:  # tag_id not in added_tags_ids and not in removed_tags_ids - nothing changed
+            resolved_tags = utils.append_to_list_in_dict(resolved_tags, collection_name, f'    {tag_name}')
+
+    return utils.humanify_resolved_user_tags(resolved_tags, do_tabulate=False)
 
 
 insert_data_hooks.append(detect_new_ru_squads)
