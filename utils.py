@@ -159,13 +159,13 @@ def notify_discord(message: str) -> None:
     """Just sends message to discord, without rate limits respect"""
     logger.debug('Sending discord message')
 
+    if len(message) >= 2000:  # discord limitation
+        logger.warning(f'Refuse to send len={len(message)}, content dump:\n{message}')
+        message = 'Len > 2000, check logs'
+
     # hookURL: str = 'https://discord.com/api/webhooks/896514472280211477/LIKgbgNIr9Nvuc-1-FfylAIY1YV-a7RMjBlyBsVDellMbnokXLYKyBztY1P9Q0mabI6o'  # noqa: E501  # FBSC
     hookURL: str = 'https://discord.com/api/webhooks/902216904507260958/EIUwZ05r0_U2oa_xz8aVVEJyTC6DVk4ENxGYSde8ZNU7aMWBsc3Bo_gBis1_yUxJc3CC'  # noqa: E501  # dev FBSC
     content: bytes = f'content={requests.utils.quote(message)}'.encode('utf-8')
-
-    if len(content) >= 2000:  # discord limitation
-        logger.warning(f'Refuse to send len={len(content)}, content dump:\n{content}')
-        return
 
     discord_request: requests.Response = requests.post(
         url=hookURL,
