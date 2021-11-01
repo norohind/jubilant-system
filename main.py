@@ -156,7 +156,7 @@ def update(squad_id: int = None, amount_to_update: int = 1):
             return
 
         id_to_update: int = single_squad_to_update[0]
-        logger.debug(f'Updating {id_to_update} ID')
+        logger.info(f'Updating {id_to_update} ID')
         utils.update_squad_info(id_to_update, db)
 
 
@@ -202,17 +202,17 @@ if __name__ == '__main__':
                 if shutting_down:
                     exit(0)
 
-                logger.debug('Updated, sleeping')
+                logger.info('Updated, sleeping')
                 can_be_shutdown = True
                 time.sleep(30 * 60)
                 can_be_shutdown = False
-                logger.debug('Discovering')
+                logger.info('Discovering')
 
                 discover()
                 if shutting_down:
                     exit(0)
 
-                logger.debug('Discovered, sleeping')
+                logger.info('Discovered, sleeping')
                 can_be_shutdown = True
                 time.sleep(30 * 60)
 
