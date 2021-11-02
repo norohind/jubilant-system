@@ -10,8 +10,11 @@ update/insert new data to DB
 alert if new data accord to triggers
 
 DB tables
-1. squads_view - contains current state of squadrons, builds automatically by update/insert/delete triggers for `transactions`
+1. squads_view - contains current state of squadrons
    note: done as view, not a table
+
+1a. squads_view_2 - as squads_view but with additional columns: current_season_score and previous_season_score
+with sums for current season and previous season
 
 2. squads_states - contains history of all updates for every squad, triggers in this table update `view` table
         squad_id int
