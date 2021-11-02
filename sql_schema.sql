@@ -100,3 +100,5 @@ where inserted_timestamp in (
     from news
     group by squad_id)
 group by squad_id;
+
+create index idx_squads_states_0 on squads_states (squad_id);
