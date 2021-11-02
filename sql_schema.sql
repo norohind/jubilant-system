@@ -101,7 +101,7 @@ where inserted_timestamp in (
     group by squad_id)
 group by squad_id;
 
-create index idx_squads_states_0 on squads_states (squad_id);
+create index if not exists idx_squads_states_0 on squads_states (squad_id);
 
 create view if not exists squads_view_2
 as
