@@ -93,11 +93,16 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
 
         selected_proxy['last_try'] = time.time()  # because link, lol
 
-        if proxiedFapiRequest.request == 418:  # FAPI is on maintenance
+        if proxiedFapiRequest.status_code == 418:  # FAPI is on maintenance
             logger.warning(f'{method.upper()} {proxiedFapiRequest.url} returned 418, content dump:\n'
                            f'{proxiedFapiRequest.content}')
 
             raise FAPIDownForMaintenance
+
+        elif proxiedFapiRequest.status_code != 200:
+            logger.warning(f"Request to {method.upper()} {url!r} with kwargs: {kwargs}, using {selected_proxy['url']} "
+                           f"proxy ends with {proxiedFapiRequest.status_code} status code, content: "
+                           f"{proxiedFapiRequest.content}")
 
         return proxiedFapiRequest
 
