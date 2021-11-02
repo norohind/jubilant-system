@@ -194,10 +194,6 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message = message + f'Minor faction changed: {old_faction} -> {new_faction}\n'
 
     # let's check tags changes
-    new_tags_raw, old_tags_raw = new_old_diff('user_tags', db_conn, squad_id)
-    new_tags: list = json.loads(new_tags_raw)
-    old_tags: list = json.loads(old_tags_raw)
-
     if new_tags == old_tags:
         # nothing changed
         pass
@@ -208,7 +204,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
     if len(message) != 0:
         utils.notify_discord(f'State changing for `{squad_info["name"]}` {squad_info["tag"]}\n'
                              f'platform: {squad_info["platform"]}\nmembers: {squad_info["memberCount"]}\n'
-                             f'created: {squad_info["created"]}\n' + message)
+                             f'created: {squad_info["created"]}\nowner: {squad_info["ownerName"]}\n' + message)
 
     return
 
