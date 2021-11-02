@@ -440,7 +440,7 @@ def get_main_logger(sublogger_name: str = '') -> 'LoggerMixin':
 
 
 # Singleton
-loglevel = logging._nameToLevel.get(os.getenv('JUBILANT_LOG_LEVEL').upper(), logging.DEBUG)  # noqa:
+loglevel = logging._nameToLevel.get(os.getenv('JUBILANT_LOG_LEVEL', 'DEBUG').upper(), logging.DEBUG)  # noqa:
 
 base_logger_name = __name__
 
