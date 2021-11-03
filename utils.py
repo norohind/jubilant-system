@@ -485,11 +485,14 @@ def append_to_list_in_dict(dict_to_append: dict[str, list[str]], key: str, value
     return dict_to_append
 
 
-def get_previous_thursday_date() -> str:
-    from datetime import date, timedelta
+def get_previous_thursday_severs_reboot_datetime() -> str:
+    import datetime
     from calendar import THURSDAY
 
-    today = date.today()
+    today = datetime.date.today()
     offset = (today.weekday() - THURSDAY) % 7
-    last_wednesday = today - timedelta(days=offset)
-    return str(last_wednesday)
+    last_thursday = today - datetime.timedelta(days=offset)
+    last_servers_reboot = datetime.datetime(last_thursday.year, last_thursday.month, last_thursday.day) + \
+        datetime.timedelta(hours=10, minutes=30)
+
+    return last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')

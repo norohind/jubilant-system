@@ -161,7 +161,7 @@ def update(squad_id: int = None, amount_to_update: int = 1, thursday_target: boo
     logger.debug(f'Going to update {amount_to_update} squadrons with thursday_target = {thursday_target}')
 
     if thursday_target:
-        prev_thursday = f'{utils.get_previous_thursday_date()} 10:30:00'
+        prev_thursday = utils.get_previous_thursday_severs_reboot_datetime()
         squads_id_to_update: list = db.execute(
             sql_requests.select_squads_to_update_thursday_aimed, (prev_thursday, amount_to_update)).fetchall()
 
