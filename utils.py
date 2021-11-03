@@ -499,23 +499,30 @@ def get_previous_thursday_severs_reboot_datetime() -> str:
     from calendar import THURSDAY
 
     today = datetime.date.today()
-    offset: int = (today.weekday() - THURSDAY) % 7
+    offset_to_thursday: int = (today.weekday() - THURSDAY) % 7
 
-    last_thursday = today - datetime.timedelta(days=offset)
-    last_servers_reboot = datetime.datetime(last_thursday.year, last_thursday.month, last_thursday.day) + \
+    last_thursday = today - datetime.timedelta(days=offset_to_thursday)
+
+    probably_last_server_reboot = datetime.datetime(last_thursday.year, last_thursday.month, last_thursday.day) + \
         datetime.timedelta(hours=10, minutes=30)
 
-    if offset == 0:
+    last_reboot_str: str = str()
+
+    if offset_to_thursday == 0:
         # let's determine if now more then 10:30:00 utc
-        if datetime.datetime.utcnow() > last_servers_reboot:
-            # reboot done
-            logger.info(f"Reboot done today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
-            return last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')
+        if datetime.datetime.utcnow() > probably_last_server_reboot:
+            # reboot done today
+            last_reboot_str = probably_last_server_reboot.strftime('%Y-%m-%d %H:%M:%S')
+            logger.info(f"Reboot done today: {last_reboot_str}")
 
         else:
-            # pending reboot
-            logger.info(f"Pending reboot today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
-            return (last_servers_reboot - datetime.timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+            # pending reboot today
+            last_reboot_str = (probably_last_server_reboot - datetime.timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+            logger.info(f"Pending reboot today: {last_reboot_str}")
 
-    logger.info(f"Not pending reboot today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
-    return last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        # reboot was not today
+        last_reboot_str = probably_last_server_reboot.strftime('%Y-%m-%d %H:%M:%S')
+        logger.info(f"Not pending reboot today: {last_reboot_str}")
+
+    return last_reboot_str
