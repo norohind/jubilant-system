@@ -1,3 +1,6 @@
+TODO:
+Add support for storing squads rosters
+
 What to track?
 1. Squadrons state (info endpoint)
 2. Squadrons news (news/list endpoint)
