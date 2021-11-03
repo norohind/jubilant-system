@@ -483,3 +483,13 @@ def append_to_list_in_dict(dict_to_append: dict[str, list[str]], key: str, value
         dict_to_append.update({key: [value]})
 
     return dict_to_append
+
+
+def get_previous_thursday_date() -> str:
+    from datetime import date, timedelta
+    from calendar import THURSDAY
+
+    today = date.today()
+    offset = (today.weekday() - THURSDAY) % 7
+    last_wednesday = today - timedelta(days=offset)
+    return str(last_wednesday)

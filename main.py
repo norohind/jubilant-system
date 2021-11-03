@@ -142,9 +142,11 @@ def discover(back_count: int = 0):
             tries = tries + 1
 
 
-def update(squad_id: int = None, amount_to_update: int = 1):
+def update(squad_id: int = None, amount_to_update: int = 1, thursday_target: bool = False):
     """
 
+    :param thursday_target: if we aiming to update all squads before thursday (FDEV scheduled maintenance)
+    and we don't wanna update squads which already updated after previous thursday
     :param squad_id: update specified squad, updates only that squad
     :param amount_to_update: update specified amount, ignores when squad_id specified
     :return:
@@ -156,8 +158,18 @@ def update(squad_id: int = None, amount_to_update: int = 1):
         # suppress_absence is required because if we updating squad with some high id it may just don't exists yet
         return
 
-    logger.debug(f'Going to update {amount_to_update} squadrons')
-    squads_id_to_update: list = db.execute(sql_requests.select_squads_to_update, (amount_to_update,)).fetchall()
+    logger.debug(f'Going to update {amount_to_update} squadrons with thursday_target = {thursday_target}')
+
+    if thursday_target:
+        prev_thursday = f'{utils.get_previous_thursday_date()} 10:30:00'
+        squads_id_to_update: list = db.execute(
+            sql_requests.select_squads_to_update_thursday_aimed, (prev_thursday, amount_to_update)).fetchall()
+
+        if len(squads_id_to_update) == 0:
+            logger.info(f'thursday_target and no squads to update')
+
+    else:
+        squads_id_to_update: list = db.execute(sql_requests.select_squads_to_update, (amount_to_update,)).fetchall()
 
     for single_squad_to_update in squads_id_to_update:  # if db is empty, then loop will not happen
 
@@ -207,7 +219,7 @@ if __name__ == '__main__':
             while True:
                 can_be_shutdown = False
 
-                update(amount_to_update=500)
+                update(amount_to_update=500, thursday_target=True)
                 if shutting_down:
                     exit(0)
 
