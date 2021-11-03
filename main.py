@@ -75,9 +75,9 @@ def shutdown_callback(sig, frame) -> None:
         exit(0)
 
 
-def discover():
+def discover(back_count: int = 0):
     """Discover new squads
-
+    :param back_count: int how many squads back we should check, it is helpful to recheck newly created squads
     :return:
     """
 
@@ -103,6 +103,15 @@ def discover():
     will just waste our time and, probable, confuses FDEV 
     *Outdated but it still can be more smart*
     """
+
+    if back_count != 0:
+        logger.debug(f'back_count = {back_count}')
+
+        squad_id: list
+        for squad_id in db.execute(sql_requests.select_new_squads_to_update, (back_count,)).fetchall():
+            squad_id: int = squad_id[0]
+            logger.debug(f'Back updating {squad_id}')
+            utils.update_squad_info(squad_id, db)
 
     while True:
 
@@ -208,7 +217,7 @@ if __name__ == '__main__':
                 can_be_shutdown = False
                 logger.info('Discovering')
 
-                discover()
+                discover(back_count=20)
                 if shutting_down:
                     exit(0)
 

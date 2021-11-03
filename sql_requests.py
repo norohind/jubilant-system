@@ -72,6 +72,11 @@ from squads_view
 order by inserted_timestamp asc
 limit ?;"""
 
+select_new_squads_to_update: str = """select squad_id 
+from squads_view
+order by squad_id desc
+limit ?;"""
+
 select_first_hole_id: str = """select squad_id+1 as a 
 from squads_states except 
     select squad_id 
