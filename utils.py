@@ -486,13 +486,36 @@ def append_to_list_in_dict(dict_to_append: dict[str, list[str]], key: str, value
 
 
 def get_previous_thursday_severs_reboot_datetime() -> str:
+    """
+    if now more then this week thursday 10:30:00 utc
+        return this week thursday 10:30:00 utc
+
+    else
+        return prev thursday 10:30:00 utc
+
+    :return: str of last FDEV servers reboot (theoretical)
+    """
     import datetime
     from calendar import THURSDAY
 
     today = datetime.date.today()
-    offset = (today.weekday() - THURSDAY) % 7
+    offset: int = (today.weekday() - THURSDAY) % 7
+
     last_thursday = today - datetime.timedelta(days=offset)
     last_servers_reboot = datetime.datetime(last_thursday.year, last_thursday.month, last_thursday.day) + \
         datetime.timedelta(hours=10, minutes=30)
 
+    if offset == 0:
+        # let's determine if now more then 10:30:00 utc
+        if datetime.datetime.utcnow() > last_servers_reboot:
+            # reboot done
+            logger.info(f"Reboot done today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
+            return last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')
+
+        else:
+            # pending reboot
+            logger.info(f"Pending reboot today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
+            return (last_servers_reboot - datetime.timedelta(days=7)).strftime('%Y-%m-%d %H:%M:%S')
+
+    logger.info(f"Not pending reboot today: {last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')}")
     return last_servers_reboot.strftime('%Y-%m-%d %H:%M:%S')
