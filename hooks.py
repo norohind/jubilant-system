@@ -202,7 +202,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message += f"```diff\n{tags_diff2str(new_tags, old_tags)}```"
 
     if len(message) != 0:
-        utils.notify_discord(f'State changing for `{squad_info["name"]}` {squad_info["tag"]}\n'
+        utils.notify_discord(f'State changing for RU squad `{squad_info["name"]}` {squad_info["tag"]}\n'
                              f'platform: {squad_info["platform"]}\nmembers: {squad_info["memberCount"]}\n'
                              f'created: {squad_info["created"]}\nowner: {squad_info["ownerName"]}\n' + message)
 
@@ -235,7 +235,8 @@ def detect_removing_ru_squads(squad_id: int, db_conn: sqlite3.Connection):
 
     if 32 in user_tags:
         # ru squad
-        message = f'Deleted squad `{name}`\nplatform: {platform}, members: {members}, tag: {tag}, created: {created}'
+        message = f'Deleted squad RU squad `{name}`\nplatform: {platform}, members: {members}, tag: {tag}, ' \
+                  f'created: {created}'
         utils.notify_discord(message)
 
     return
