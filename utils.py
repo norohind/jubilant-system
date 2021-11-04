@@ -506,7 +506,7 @@ def get_previous_thursday_severs_reboot_datetime() -> str:
     probably_last_server_reboot = datetime.datetime(last_thursday.year, last_thursday.month, last_thursday.day) + \
         datetime.timedelta(hours=7, minutes=30)
 
-    last_reboot_str: str = str()
+    last_reboot_str: str
 
     if offset_to_thursday == 0:
         # let's determine if now more then 10:30:00 utc

@@ -76,19 +76,19 @@ def detect_new_ru_squads(squad_info: dict, db_conn: sqlite3.Connection) -> None:
                 else:
                     motd = f"`{squad_info['motd']}`"
                 previous_season_sum: int = squad_info['previous_season_trade_score'] + \
-                                           squad_info['previous_season_combat_score'] + \
-                                           squad_info['previous_season_exploration_score'] + \
-                                           squad_info['previous_season_cqc_score'] + \
-                                           squad_info['previous_season_bgs_score'] + \
-                                           squad_info['previous_season_powerplay_score'] + \
-                                           squad_info['previous_season_aegis_score']
+                    squad_info['previous_season_combat_score'] + \
+                    squad_info['previous_season_exploration_score'] + \
+                    squad_info['previous_season_cqc_score'] + \
+                    squad_info['previous_season_bgs_score'] + \
+                    squad_info['previous_season_powerplay_score'] + \
+                    squad_info['previous_season_aegis_score']
                 current_season_sum: int = squad_info['current_season_trade_score'] + \
-                                          squad_info['current_season_combat_score'] + \
-                                          squad_info['current_season_exploration_score'] + \
-                                          squad_info['current_season_cqc_score'] + \
-                                          squad_info['current_season_bgs_score'] + \
-                                          squad_info['current_season_powerplay_score'] + \
-                                          squad_info['current_season_aegis_score']
+                    squad_info['current_season_combat_score'] + \
+                    squad_info['current_season_exploration_score'] + \
+                    squad_info['current_season_cqc_score'] + \
+                    squad_info['current_season_bgs_score'] + \
+                    squad_info['current_season_powerplay_score'] + \
+                    squad_info['current_season_aegis_score']
                 message = f"""
 New russian squad with more then {MEMBERS_LOW_THRESHOLD} members: {squad_info['name']}
 members: {squad_info['memberCount']}

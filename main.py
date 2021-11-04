@@ -89,9 +89,9 @@ def discover(back_count: int = 0):
     TRIES_LIMIT_RETROSPECTIVELY: int = 5000
     TRIES_LIMIT_ON_THE_TIME: int = 5
 
-    def smart_tries_limit(squad_id: int) -> int:  # something smarter but still have to be better
+    def smart_tries_limit(_squad_id: int) -> int:  # something smarter but still have to be better
 
-        if squad_id < 65000:
+        if _squad_id < 65000:
             return TRIES_LIMIT_RETROSPECTIVELY
 
         else:
