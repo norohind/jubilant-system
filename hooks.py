@@ -235,7 +235,7 @@ def detect_removing_ru_squads(squad_id: int, db_conn: sqlite3.Connection):
 
     if 32 in user_tags:
         # ru squad
-        message = f'Deleted squad RU squad `{name}`\nplatform: {platform}, members: {members}, tag: {tag}, ' \
+        message = f'Deleted RU squad `{name}`\nplatform: {platform}, members: {members}, tag: {tag}, ' \
                   f'created: {created}'
         utils.notify_discord(message)
 
