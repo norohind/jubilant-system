@@ -16,7 +16,14 @@ BASE_URL = 'https://api.orerve.net/2.0/website/squadron/'
 INFO_ENDPOINT = 'info'
 NEWS_ENDPOINT = 'news/list'
 
-TIME_BETWEEN_REQUESTS: float = float(os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS")) or 3.0
+TIME_BETWEEN_REQUESTS: float = 3.0
+if os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS") is not None:
+    try:
+        TIME_BETWEEN_REQUESTS = float(os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS"))
+
+    except TypeError:  # env doesn't contain a float
+        pass
+
 logger.debug(f'TIME_BETWEEN_REQUESTS = {TIME_BETWEEN_REQUESTS} {type(TIME_BETWEEN_REQUESTS)}')
 
 with open('available.json', 'r', encoding='utf-8') as available_file:
