@@ -16,6 +16,9 @@ BASE_URL = 'https://api.orerve.net/2.0/website/squadron/'
 INFO_ENDPOINT = 'info'
 NEWS_ENDPOINT = 'news/list'
 
+TIME_BETWEEN_REQUESTS: float = float(os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS")) or 3.0
+logger.debug(f'TIME_BETWEEN_REQUESTS = {TIME_BETWEEN_REQUESTS} {type(TIME_BETWEEN_REQUESTS)}')
+
 with open('available.json', 'r', encoding='utf-8') as available_file:
     TAG_COLLECTIONS: dict = json.load(available_file)['SquadronTagData']['SquadronTagCollections']
 
@@ -53,9 +56,6 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
     """
 
     global PROXIES_DICT
-
-    TIME_BETWEEN_REQUESTS: float = float(os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS")) or 3.0
-    logger.debug(f'TIME_BETWEEN_REQUESTS = {TIME_BETWEEN_REQUESTS} {type(TIME_BETWEEN_REQUESTS)}')
 
     while True:
 
