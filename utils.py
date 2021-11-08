@@ -95,7 +95,7 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
                          f'{len(proxiedFapiRequest.content)}')
 
         except requests.exceptions.ConnectionError as e:
-            logger.exception(f'Proxy {selected_proxy["url"]} is invalid: {e}')
+            logger.exception(f'Proxy {selected_proxy["url"]} is invalid: {str(e)}')
             selected_proxy['last_try'] = time.time()  # because link, lol
             continue
 
