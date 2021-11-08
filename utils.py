@@ -54,7 +54,8 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
 
     global PROXIES_DICT
 
-    TIME_BETWEEN_REQUESTS: float = 3.0
+    TIME_BETWEEN_REQUESTS: float = float(os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS")) or 3.0
+    logger.debug(f'TIME_BETWEEN_REQUESTS = {TIME_BETWEEN_REQUESTS} {type(TIME_BETWEEN_REQUESTS)}')
 
     while True:
 
