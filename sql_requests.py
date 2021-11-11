@@ -106,4 +106,5 @@ where squad_id = ?;"""
 select_squads_to_update_thursday_aimed: str = """select squad_id 
 from squads_view 
 where inserted_timestamp < ?
+order by inserted_timestamp asc
 limit ?;"""
