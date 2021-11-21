@@ -267,7 +267,7 @@ def new_old_news_diff(column: str, db_conn: sqlite3.Connection, squad_id: int) -
     :param squad_id:
     :return:
     """
-    sql_req: sqlite3.Cursor = db_conn.execute(sql_requests.select_old_new_news.format(column=column), (squad_id,))
+    sql_req: sqlite3.Cursor = db_conn.execute(sql_requests.select_new_old_news.format(column=column), (squad_id,))
 
     try:
         new = sql_req.fetchone()[0]
