@@ -115,35 +115,6 @@ def proxied_request(url: str, method: str = 'get', **kwargs) -> requests.Respons
         return proxiedFapiRequest
 
 
-def authed_request(url: str, method: str = 'get', **kwargs) -> requests.Response:
-    """Deprecated and will be removed; Makes request to any url with valid bearer token
-
-    :param url: url to make request
-    :param method: method to make request, case insensitive, get by default
-    :param kwargs: will be passed to requests.request
-    :return: requests.Response object
-    """
-
-    bearer: str = _get_bearer()
-
-    logger.debug(f'Requesting {method.upper()} {url!r}, kwargs: {kwargs}')
-
-    fapiRequest: requests.Response = proxied_request(
-        method=method,
-        url=url,
-        headers={'Authorization': f'Bearer {bearer}'},
-        **kwargs
-    )
-
-    logger.debug(f'Request complete, code {fapiRequest.status_code!r}, len {len(fapiRequest.content)}')
-
-    if fapiRequest.request == 418:  # it does it on maintenance
-        logger.warning(f'{method.upper()} {fapiRequest.url} returned 418, content dump:\n{fapiRequest.content}')
-        raise FAPIDownForMaintenance
-
-    return fapiRequest
-
-
 def _get_bearer() -> str:
     """Gets bearer token from capi.demb.design (companion-api project)
 
