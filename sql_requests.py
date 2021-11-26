@@ -100,7 +100,7 @@ limit 2;"""
 # limit 2;"""
 select_new_old_news: str = """select {column} 
 from news 
-where squad_id = ? and category = 'Squadrons_History_Category_PublicStatement' 
+where squad_id = ? and type_of_news = 'public_statements' 
 order by inserted_timestamp desc 
 limit 2;"""
 

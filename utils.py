@@ -238,6 +238,19 @@ def _update_squad_news(squad_id: int, db_conn: sqlite3.Connection) -> Union[bool
         for type_of_news_key in squad_news:
             one_type_of_news: list = squad_news[type_of_news_key]
 
+            if len(squad_news[type_of_news_key]) == 0:
+                logger.info(f'squad_news[{type_of_news_key}] len == 0')
+
+                with db_conn:
+                    db_conn.execute(
+                        sql_requests.insert_news,
+                        (
+                            squad_id,
+                            type_of_news_key,
+                            *[None for i in range(0, 10)]
+                        )
+                    )
+
             news: dict
             for news in one_type_of_news:
                 with db_conn:
