@@ -65,8 +65,18 @@ Two modes:
 """
 
 
-def shutdown_callback(sig, frame) -> None:
+def shutdown_callback(sig: int, frame) -> None:
     logger.info(f'Planning shutdown by {sig} signal')
+    try:
+        import inspect
+        frame_info = inspect.getframeinfo(frame)
+        func = frame_info.function
+        code_line = frame_info.code_context[0]
+        logger.info(f'Currently at {func}:{frame_info.lineno}: {code_line!r}')
+
+    except Exception as e:
+        logger.info(f"Can't detect where we are because {e}")
+
     global shutting_down
     shutting_down = True
 
