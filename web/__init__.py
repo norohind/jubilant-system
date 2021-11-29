@@ -2,11 +2,8 @@ import os
 import falcon
 import json
 
-os.chdir('..')
-
 from model import model
-import dynamic_js
-import utils
+from web import dynamic_js
 
 
 class SquadsInfoByTag:
