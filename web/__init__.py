@@ -5,6 +5,8 @@ import json
 from model import model
 from web import dynamic_js
 
+model.open_model()
+
 
 class SquadsInfoByTag:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
