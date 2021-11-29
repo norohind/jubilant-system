@@ -229,7 +229,7 @@ if __name__ == '__main__':
             while True:
                 can_be_shutdown = False
 
-                update(amount_to_update=500, thursday_target=True)
+                update(amount_to_update=500, thursday_target=False)
                 if shutting_down:
                     exit(0)
 
