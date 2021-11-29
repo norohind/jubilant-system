@@ -210,7 +210,7 @@ def _update_squad_news(squad_id: int, db_conn: sqlite3.Connection) -> Union[bool
             one_type_of_news: list = squad_news[type_of_news_key]
 
             if len(squad_news[type_of_news_key]) == 0:
-                logger.info(f'squad_news[{type_of_news_key}] len == 0')
+                logger.debug(f'squad_news[{type_of_news_key}] len == 0 for {squad_id}')
 
                 with db_conn:
                     db_conn.execute(
