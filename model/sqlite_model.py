@@ -23,29 +23,45 @@ class SqliteModel:
 
         self.db.close()
 
-    def list_squads_by_tag(self, tag: str) -> list:
+    def list_squads_by_tag(self, tag: str, pretty_keys=False) -> list:
         """
         Take tag and return all squads with tag matches without user_tags
 
+        :param pretty_keys:
         :param tag:
         :return:
         """
 
-        squads = self.db.execute(sqlite_sql_requests.squads_by_tag, {'tag': tag.upper()}).fetchall()
+        if pretty_keys:
+            sql_req = sqlite_sql_requests.squads_by_tag_short_pretty_keys
+
+        else:
+            sql_req = sqlite_sql_requests.squads_by_tag_short_raw_keys
+
+        squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
 
         return squads
 
-    def list_squads_by_tag_with_tags(self, tag: str) -> list:
+    def list_squads_by_tag_with_tags(self, tag: str, pretty_keys=False) -> list:
         """
         Take tag and return all squads with tag matches with user_tags
 
+        :param pretty_keys:
         :param tag:
         :return:
         """
 
-        squads = self.db.execute(sqlite_sql_requests.squads_by_tag_extended, {'tag': tag.upper()}).fetchall()
+        if pretty_keys:
+            sql_req = sqlite_sql_requests.squads_by_tag_extended_pretty_keys
+            user_tags_key = 'User tags'
+
+        else:
+            sql_req = sqlite_sql_requests.squads_by_tag_extended_raw_keys
+            user_tags_key = 'user_tags'
+
+        squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
 
         for squad in squads:
-            squad['user_tags'] = json.loads(squad['user_tags'])
+            squad[user_tags_key] = json.loads(squad[user_tags_key])
 
         return squads
