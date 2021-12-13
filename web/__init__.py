@@ -3,7 +3,7 @@ import falcon
 import json
 
 from model import model
-from web import dynamic_js
+from templates_engine import render
 
 model.open_model()
 
@@ -17,9 +17,13 @@ class SquadsInfoByTagShort:
 class SquadsInfoByTagShortHtml:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
         resp.content_type = falcon.MEDIA_HTML
-        model_answer = model.list_squads_by_tag(tag)
-
-        resp.text = dynamic_js.activity_table_html_template.replace('{items}', json.dumps(model_answer))
+        resp.text = render(
+            'table_template.html',
+            {
+                'target_column_name': 'None',
+                'target_new_url': ''
+            }
+        )
 
 
 class SquadsInfoByTagExtended:
@@ -36,12 +40,13 @@ class SquadsInfoByTagExtended:
 class SquadsInfoByTagExtendedHtml:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
         resp.content_type = falcon.MEDIA_HTML
-        model_answer = model.list_squads_by_tag_with_tags(tag)
-
-        for squad in model_answer:
-            squad['user_tags'] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad['user_tags']))
-
-        resp.text = dynamic_js.activity_table_html_template.replace('{items}', json.dumps(model_answer))
+        resp.text = render(
+            'table_template.html',
+            {
+                'target_column_name': 'None',
+                'target_new_url': ''
+            }
+        )
 
 
 application = falcon.App()
