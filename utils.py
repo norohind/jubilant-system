@@ -3,6 +3,7 @@ import os
 import sqlite3
 import time
 from typing import Union
+from pathlib import Path
 
 import requests
 
@@ -24,9 +25,21 @@ if os.getenv("JUBILANT_TIME_BETWEEN_REQUESTS") is not None:
     except TypeError:  # env doesn't contain a float
         pass
 
+
+def get_path_file_in_project_root(filename: str) -> str:
+    if Path.cwd().name != 'NewSquadsMonitor':
+        file_path = Path().resolve().parent.joinpath(filename)
+
+    else:
+        file_path = filename
+
+    return file_path
+
+
 logger.debug(f'TIME_BETWEEN_REQUESTS = {TIME_BETWEEN_REQUESTS} {type(TIME_BETWEEN_REQUESTS)}')
 
-with open('available.json', 'r', encoding='utf-8') as available_file:
+
+with open(get_path_file_in_project_root('available.json'), 'r', encoding='utf-8') as available_file:
     TAG_COLLECTIONS: dict = json.load(available_file)['SquadronTagData']['SquadronTagCollections']
 
 # proxy: last request time

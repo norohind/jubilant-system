@@ -1,4 +1,4 @@
-import os
+import utils
 import falcon
 import json
 
@@ -8,26 +8,48 @@ from web import dynamic_js
 model.open_model()
 
 
-class SquadsInfoByTag:
+class SquadsInfoByTagShort:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
         resp.content_type = falcon.MEDIA_JSON
         resp.text = json.dumps(model.list_squads_by_tag(tag))
 
 
-class SquadsInfoByTagHtml:
+class SquadsInfoByTagShortHtml:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
         resp.content_type = falcon.MEDIA_HTML
         model_answer = model.list_squads_by_tag(tag)
 
-        # for squad in model_answer:
-        #     squad['User tags'] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad['User tags']))
+        resp.text = dynamic_js.activity_table_html_template.replace('{items}', json.dumps(model_answer))
+
+
+class SquadsInfoByTagExtended:
+    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
+        resp.content_type = falcon.MEDIA_JSON
+        model_answer = model.list_squads_by_tag_with_tags(tag)
+
+        for squad in model_answer:
+            squad['user_tags'] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad['user_tags']))
+
+        resp.text = json.dumps(model_answer)
+
+
+class SquadsInfoByTagExtendedHtml:
+    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
+        resp.content_type = falcon.MEDIA_HTML
+        model_answer = model.list_squads_by_tag_with_tags(tag)
+
+        for squad in model_answer:
+            squad['user_tags'] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad['user_tags']))
 
         resp.text = dynamic_js.activity_table_html_template.replace('{items}', json.dumps(model_answer))
 
 
 application = falcon.App()
-application.add_route('/api/squads/now/by-tag/{tag}', SquadsInfoByTag())
-application.add_route('/squads/now/by-tag/{tag}', SquadsInfoByTagHtml())
+application.add_route('/api/squads/now/by-tag/short/{tag}', SquadsInfoByTagShort())
+application.add_route('/squads/now/by-tag/short/{tag}', SquadsInfoByTagShortHtml())
+
+application.add_route('/api/squads/now/by-tag/extended/{tag}', SquadsInfoByTagExtended())
+application.add_route('/squads/now/by-tag/extended/{tag}', SquadsInfoByTagExtendedHtml())
 
 if __name__ == '__main__':
     model.open_model()
