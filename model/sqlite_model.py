@@ -1,8 +1,6 @@
 import sqlite3
 from . import sqlite_sql_requests
 import json
-from pathlib import Path
-from utils import get_path_file_in_project_root
 
 
 class SqliteModel:
@@ -14,7 +12,7 @@ class SqliteModel:
         :return:
         """
 
-        self.db = sqlite3.connect(get_path_file_in_project_root('squads.sqlite'), check_same_thread=False)
+        self.db = sqlite3.connect('squads.sqlite', check_same_thread=False)
         self.db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
 
     def close_model(self) -> None:
