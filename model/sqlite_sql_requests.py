@@ -12,7 +12,8 @@ squads_by_tag_short_pretty_keys = """select
     inserted_timestamp as "Updated UTC",
     squad_id
 from squads_view
-where tag = :tag;
+where tag = :tag
+order by platform;
 """
 
 squads_by_tag_short_raw_keys = """select 
@@ -29,7 +30,8 @@ squads_by_tag_short_raw_keys = """select
     inserted_timestamp,
     squad_id
 from squads_view
-where tag = :tag;
+where tag = :tag
+order by platform;
 """
 
 squads_by_tag_extended_pretty_keys = """select 
@@ -46,7 +48,8 @@ squads_by_tag_extended_pretty_keys = """select
     inserted_timestamp as "Updated UTC",
     squad_id
 from squads_view
-where tag = :tag;
+where tag = :tag
+order by platform;
 """
 
 squads_by_tag_extended_raw_keys = """select 
@@ -54,6 +57,7 @@ squads_by_tag_extended_raw_keys = """select
     tag,
     member_count,
     owner_name,
+    owner_id,
     platform,
     created,
     power_name,
@@ -63,7 +67,8 @@ squads_by_tag_extended_raw_keys = """select
     inserted_timestamp,
     squad_id
 from squads_view
-where tag = :tag;
+where tag = :tag
+order by platform;
 """
 
 select_latest_motd_by_id = """select 
