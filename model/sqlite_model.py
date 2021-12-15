@@ -45,6 +45,7 @@ class SqliteModel:
         return squads
 
     def list_squads_by_tag_with_tags(self, tag: str, pretty_keys=False, motd=False) -> list:
+        # TODO: merge it with motd_by_squad_id, change keys names in this method, not in DBMS by a request
         """
         Take tag and return all squads with tag matches with user_tags
 
@@ -60,6 +61,8 @@ class SqliteModel:
             motd_key = 'Motd'
             motd_date_key = 'Motd Date'
             motd_author_key = 'Motd Author'
+            owner_name_key = 'Owner'
+            platform_key = 'Platform'
 
         else:
             sql_req = sqlite_sql_requests.squads_by_tag_extended_raw_keys
@@ -67,11 +70,20 @@ class SqliteModel:
             motd_key = 'motd'
             motd_date_key = 'motd_date'
             motd_author_key = 'motd_author'
+            owner_name_key = 'owner_name'
+            platform_key = 'platform'
 
         squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
 
         for squad in squads:
             squad[user_tags_key] = json.loads(squad[user_tags_key])
+
+            if squad[platform_key] != 'PC':  # then we have to try to resolve owner's nickname
+                potential_owner_nickname = self.nickname_by_fid_news_based(squad['owner_id'])
+                if potential_owner_nickname is not None:
+                    squad[owner_name_key] = potential_owner_nickname
+
+                del squad['owner_id']  # delete fid anyway
 
             if motd:
                 motd_dict: dict = self.motd_by_squad_id(squad['squad_id'])
@@ -102,3 +114,13 @@ class SqliteModel:
         sql_req = self.db.execute(sqlite_sql_requests.select_latest_motd_by_id, {'squad_id': squad_id})
 
         return sql_req.fetchone()
+
+    def nickname_by_fid_news_based(self, fid: str) -> Union[str, None]:
+        sql_req = self.db.execute(sqlite_sql_requests.select_nickname_by_fid_news_based, {'fid': fid})
+
+        sql_result = sql_req.fetchone()
+        if sql_result is None:
+            return None
+
+        else:
+            return sql_result['author']

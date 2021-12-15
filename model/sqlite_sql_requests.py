@@ -46,7 +46,8 @@ squads_by_tag_extended_pretty_keys = """select
     faction_name as "Faction name",
     user_tags as "User tags",
     inserted_timestamp as "Updated UTC",
-    squad_id
+    squad_id,
+    owner_id
 from squads_view
 where tag = :tag
 order by platform;
@@ -80,5 +81,12 @@ where
     squad_id = :squad_id and 
     type_of_news = 'public_statements' and 
     category = 'Squadrons_History_Category_PublicStatement' 
+order by date desc 
+limit 1;"""
+
+select_nickname_by_fid_news_based = """select 
+    author 
+from news 
+where cmdr_id = :fid 
 order by date desc 
 limit 1;"""
