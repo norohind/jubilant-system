@@ -8,7 +8,7 @@ from templates_engine import render
 model.open_model()
 
 
-class SquadsInfoByTagShortHtml:
+class SquadsInfoByTagHtml:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
         resp.content_type = falcon.MEDIA_HTML
         resp.text = render(
@@ -64,23 +64,11 @@ class SquadsInfoByTag:
         resp.text = json.dumps(model_answer)
 
 
-class SquadsInfoByTagExtendedHtml:
-    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
-        resp.content_type = falcon.MEDIA_HTML
-        resp.text = render(
-            'table_template.html',
-            {
-                'target_column_name': 'None',
-                'target_new_url': ''
-            }
-        )
-
-
 application = falcon.App()
-application.add_route('/squads/now/by-tag/short/{tag}', SquadsInfoByTagShortHtml())
+application.add_route('/squads/now/by-tag/short/{tag}', SquadsInfoByTagHtml())
+application.add_route('/squads/now/by-tag/extended/{tag}', SquadsInfoByTagHtml())
 
 application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag())
-application.add_route('/squads/now/by-tag/extended/{tag}', SquadsInfoByTagExtendedHtml())
 
 if __name__ == '__main__':
     model.open_model()
