@@ -83,7 +83,7 @@ class SqliteModel:
                 if potential_owner_nickname is not None:
                     squad[owner_name_key] = potential_owner_nickname
 
-                del squad['owner_id']  # delete fid anyway
+            del squad['owner_id']  # delete fid anyway
 
             if motd:
                 motd_dict: dict = self.motd_by_squad_id(squad['squad_id'])
