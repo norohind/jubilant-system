@@ -65,3 +65,15 @@ squads_by_tag_extended_raw_keys = """select
 from squads_view
 where tag = :tag;
 """
+
+select_latest_motd_by_id = """select 
+    motd, 
+    date, 
+    author 
+from news 
+where 
+    squad_id = :squad_id and 
+    type_of_news = 'public_statements' and 
+    category = 'Squadrons_History_Category_PublicStatement' 
+order by date desc 
+limit 1;"""

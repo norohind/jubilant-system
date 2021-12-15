@@ -1,6 +1,8 @@
 import sqlite3
 from . import sqlite_sql_requests
 import json
+from typing import Union
+from datetime import datetime
 
 
 class SqliteModel:
@@ -42,10 +44,11 @@ class SqliteModel:
 
         return squads
 
-    def list_squads_by_tag_with_tags(self, tag: str, pretty_keys=False) -> list:
+    def list_squads_by_tag_with_tags(self, tag: str, pretty_keys=False, motd=False) -> list:
         """
         Take tag and return all squads with tag matches with user_tags
 
+        :param motd: if we should return motd with information
         :param pretty_keys:
         :param tag:
         :return:
@@ -54,14 +57,48 @@ class SqliteModel:
         if pretty_keys:
             sql_req = sqlite_sql_requests.squads_by_tag_extended_pretty_keys
             user_tags_key = 'User tags'
+            motd_key = 'Motd'
+            motd_date_key = 'Motd Date'
+            motd_author_key = 'Motd Author'
 
         else:
             sql_req = sqlite_sql_requests.squads_by_tag_extended_raw_keys
             user_tags_key = 'user_tags'
+            motd_key = 'motd'
+            motd_date_key = 'motd_date'
+            motd_author_key = 'motd_author'
 
         squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
 
         for squad in squads:
             squad[user_tags_key] = json.loads(squad[user_tags_key])
 
+            if motd:
+                motd_dict: dict = self.motd_by_squad_id(squad['squad_id'])
+
+                if motd_dict is None:
+                    # if no motd, then all motd related values will be None
+                    motd_dict = dict()
+                    squad[motd_date_key] = None
+
+                else:
+                    squad[motd_date_key] = datetime.utcfromtimestamp(int(motd_dict.get('date'))).strftime('%Y-%m-%d '
+                                                                                                          '%H:%M:%S')
+
+                squad[motd_key] = motd_dict.get('motd')
+                squad[motd_author_key] = motd_dict.get('author')
+
         return squads
+
+    def motd_by_squad_id(self, squad_id: int) -> Union[dict, None]:
+        """
+        Take squad_id and returns dict with last motd: motd, date, author keys. It also can return None if motd isn't
+        set for squad
+
+        :param squad_id:
+        :return:
+        """
+
+        sql_req = self.db.execute(sqlite_sql_requests.select_latest_motd_by_id, {'squad_id': squad_id})
+
+        return sql_req.fetchone()

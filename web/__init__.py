@@ -24,8 +24,9 @@ class SquadsInfoByTag:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str, details_type: str) -> None:
         """
         Params to request:
-        resolve_tags: bool
-        pretty_keys: bool
+        resolve_tags: bool - if we will resolve tags or put it just as tags ids
+        pretty_keys: bool - if we will return list of dicts with human friendly keys or raw column names from DB
+        motd: bool - if we will also return motd of squad, works only with `extended`
 
         :param details_type: short or extended, extended includes tags
         :param req:
@@ -37,11 +38,14 @@ class SquadsInfoByTag:
         resp.content_type = falcon.MEDIA_JSON
         details_type = details_type.lower()
 
+        motd: bool = req.params.get('motd', 'false').lower() == 'true'
+
         if details_type == 'short':
             model_method = model.list_squads_by_tag
 
         elif details_type == 'extended':
-            model_method = model.list_squads_by_tag_with_tags
+            def model_method(*args, **kwargs):
+                return model.list_squads_by_tag_with_tags(*args, **kwargs, motd=motd)
 
         else:
             raise falcon.HTTPBadRequest(description=f'details_type must be one of short, extended')
