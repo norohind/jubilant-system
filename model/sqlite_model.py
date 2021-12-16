@@ -1,4 +1,6 @@
 import sqlite3
+
+import utils
 from . import sqlite_sql_requests
 import json
 from typing import Union
@@ -25,80 +27,68 @@ class SqliteModel:
 
         self.db.close()
 
-    def list_squads_by_tag(self, tag: str, pretty_keys=False) -> list:
+    def list_squads_by_tag(self, tag: str, pretty_keys=False, motd=False, resolve_tags=False, extended=False) -> list:
         """
-        Take tag and return all squads with tag matches without user_tags
+        Take tag and return all squads with tag matches
 
-        :param pretty_keys:
-        :param tag:
-        :return:
-        """
-
-        if pretty_keys:
-            sql_req = sqlite_sql_requests.squads_by_tag_short_pretty_keys
-
-        else:
-            sql_req = sqlite_sql_requests.squads_by_tag_short_raw_keys
-
-        squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
-
-        return squads
-
-    def list_squads_by_tag_with_tags(self, tag: str, pretty_keys=False, motd=False) -> list:
-        # TODO: merge it with motd_by_squad_id, change keys names in this method, not in DBMS by a request
-        """
-        Take tag and return all squads with tag matches with user_tags
-
+        :param extended: if false, then we don't return tags and motd anyway
         :param motd: if we should return motd with information
-        :param pretty_keys:
-        :param tag:
+        :param resolve_tags: if we should resolve tags or return it as plain list of IDs
+        :param pretty_keys: if we should use pretty keys or raw column names from DB
+        :param tag: tag to get info about squad
         :return:
         """
 
-        if pretty_keys:
-            sql_req = sqlite_sql_requests.squads_by_tag_extended_pretty_keys
-            user_tags_key = 'User tags'
-            motd_key = 'Motd'
-            motd_date_key = 'Motd Date'
-            motd_author_key = 'Motd Author'
-            owner_name_key = 'Owner'
-            platform_key = 'Platform'
-
-        else:
-            sql_req = sqlite_sql_requests.squads_by_tag_extended_raw_keys
-            user_tags_key = 'user_tags'
-            motd_key = 'motd'
-            motd_date_key = 'motd_date'
-            motd_author_key = 'motd_author'
-            owner_name_key = 'owner_name'
-            platform_key = 'platform'
-
-        squads = self.db.execute(sql_req, {'tag': tag.upper()}).fetchall()
-
+        squads = self.db.execute(sqlite_sql_requests.squads_by_tag_extended_raw_keys, {'tag': tag.upper()}).fetchall()
+        squad: dict
         for squad in squads:
-            squad[user_tags_key] = json.loads(squad[user_tags_key])
+            squad['user_tags'] = json.loads(squad['user_tags'])
 
-            if squad[platform_key] != 'PC':  # then we have to try to resolve owner's nickname
+            """
+            We have, according to arguments, to:
+            include motd if extended
+            try to resolve owner nickname for consoles
+            delete owner_id
+            resolve tags if extended
+            remove tags if not extended
+            make keys pretty
+            """
+
+            if extended:
+                if motd:  # motd including
+                    motd_dict: dict = self.motd_by_squad_id(squad['squad_id'])
+
+                    if motd_dict is None:
+                        # if no motd, then all motd related values will be None
+                        motd_dict = dict()
+                        squad['motd_date'] = None
+
+                    else:
+                        squad['motd_date'] = datetime.utcfromtimestamp(int(motd_dict.get('date')))\
+                            .strftime('%Y-%m-%d %H:%M:%S')
+
+                    squad['motd'] = motd_dict.get('motd')
+                    squad['motd_author'] = motd_dict.get('author')
+
+                if resolve_tags:  # tags resolving
+                    squad['user_tags'] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad['user_tags']))
+
+            else:
+                del squad['user_tags']  # remove user_tags for short
+
+            if squad['platform'] != 'PC':  # then we have to try to resolve owner's nickname
                 potential_owner_nickname = self.nickname_by_fid_news_based(squad['owner_id'])
                 if potential_owner_nickname is not None:
-                    squad[owner_name_key] = potential_owner_nickname
+                    squad['owner_name'] = potential_owner_nickname
 
             del squad['owner_id']  # delete fid anyway
 
-            if motd:
-                motd_dict: dict = self.motd_by_squad_id(squad['squad_id'])
+            # prettify keys
+            if pretty_keys:
+                for key in list(squad.keys()):
 
-                if motd_dict is None:
-                    # if no motd, then all motd related values will be None
-                    motd_dict = dict()
-                    squad[motd_date_key] = None
-
-                else:
-                    squad[motd_date_key] = datetime.utcfromtimestamp(int(motd_dict.get('date'))).strftime('%Y-%m-%d '
-                                                                                                          '%H:%M:%S')
-
-                squad[motd_key] = motd_dict.get('motd')
-                squad[motd_author_key] = motd_dict.get('author')
+                    pretty_key = utils.pretty_keys_mapping.get(key, key)
+                    squad[pretty_key] = squad.pop(key)
 
         return squads
 

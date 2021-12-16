@@ -520,3 +520,53 @@ def get_previous_thursday_severs_reboot_datetime() -> str:
         logger.info(f"Not pending reboot today: {last_reboot_str}")
 
     return last_reboot_str
+
+
+def measure(function: callable, name_to_display: str = ''):
+    """
+    Decorator to measure function (method) execution time
+    Use as easy as
+
+    @utils.measure
+    def im_function_to_measure():
+        ....
+
+    :param name_to_display:
+    :param function:
+    :return:
+    """
+    if name_to_display != '':
+        name_to_display = name_to_display + ':'
+
+    def decorated(*args, **kwargs):
+        start = time.time()
+        result = function(*args, **kwargs)
+        end = time.time()
+        print(f'{name_to_display}{function.__name__}: {(end - start) * 100} ms')
+        return result
+
+    return decorated
+
+
+class Measure:
+    def __init__(self, name: str):
+        self.start = time.time()
+        self.name = name
+
+    def record(self) -> None:
+        print(f'{self.name}: {(time.time() - self.start) * 100} ms')
+
+
+pretty_keys_mapping = {
+        'name': 'Squadron name',
+        'tag': 'Tag',
+        'member_count': 'Members',
+        'owner_name': 'Owner',
+        'platform': 'Platform',
+        'created': 'Created UTC',
+        'power_name': 'Power name',
+        'super_power_name': 'Super power name',
+        'faction_name': 'Faction name',
+        'user_tags': 'User tags',
+        'inserted_timestamp': 'Updated UTC',
+}

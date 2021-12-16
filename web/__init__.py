@@ -1,4 +1,3 @@
-import utils
 import falcon
 import json
 
@@ -40,30 +39,15 @@ class SquadsInfoByTag:
 
         motd: bool = req.params.get('motd', 'false').lower() == 'true'
 
-        if details_type == 'short':
-            model_method = model.list_squads_by_tag
-
-        elif details_type == 'extended':
-            def model_method(*args, **kwargs):
-                return model.list_squads_by_tag_with_tags(*args, **kwargs, motd=motd)
-
-        else:
+        if details_type not in ['short', 'extended']:
             raise falcon.HTTPBadRequest(description=f'details_type must be one of short, extended')
+
+        extended = details_type == 'extended'
 
         resolve_tags = req.params.get('resolve_tags', '').lower() == 'true'
         pretty_keys = req.params.get('pretty_keys', 'true').lower() == 'true'
 
-        model_answer = model_method(tag, pretty_keys=pretty_keys)
-
-        if resolve_tags and details_type == 'extended':
-            if pretty_keys:
-                user_tags_key = 'User tags'
-
-            else:
-                user_tags_key = 'user_tags'
-
-            for squad in model_answer:
-                squad[user_tags_key] = utils.humanify_resolved_user_tags(utils.resolve_user_tags(squad[user_tags_key]))
+        model_answer = model.list_squads_by_tag(tag, pretty_keys, motd, resolve_tags, extended)
 
         resp.text = json.dumps(model_answer)
 
