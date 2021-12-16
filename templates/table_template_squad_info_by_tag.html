@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+    <head>
+        <meta charset="UTF-8">
+        {{ @json2html_template.html }}
+        <link type="text/css" rel="stylesheet" href="/js/table_styles.css">
+        <title>{{ details_type }} information for {{ tag }}</title>
+    </head>
+    <body>
+        <div id="table0div">
+        </div>
+        <div id=footer1div>
+            <footer>
+                <a href="/squads/now/by-tag/extended/{{ tag }}?resolve_tags=true&motd=true">Extended information</a>
+                <a href="/squads/now/by-tag/short/{{ tag }}">Short information</a>
+            </footer>
+        </div>
+        {{ @footer.html }}
+    </body>
+</html>

@@ -8,13 +8,21 @@ model.open_model()
 
 
 class SquadsInfoByTagHtml:
-    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str) -> None:
+    def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str, details_type: str) -> None:
         resp.content_type = falcon.MEDIA_HTML
+
+        details_type = details_type.lower()
+
+        if details_type not in ['short', 'extended']:
+            raise falcon.HTTPBadRequest(description=f'details_type must be one of short, extended')
+
         resp.text = render(
-            'table_template.html',
+            'table_template_squad_info_by_tag.html',
             {
                 'target_column_name': 'None',
-                'target_new_url': ''
+                'target_new_url': '',
+                'tag': tag,
+                'details_type': details_type.title()
             }
         )
 
@@ -53,8 +61,7 @@ class SquadsInfoByTag:
 
 
 application = falcon.App()
-application.add_route('/squads/now/by-tag/short/{tag}', SquadsInfoByTagHtml())
-application.add_route('/squads/now/by-tag/extended/{tag}', SquadsInfoByTagHtml())
+application.add_route('/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTagHtml())
 
 application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag())
 
