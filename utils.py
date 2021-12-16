@@ -193,7 +193,9 @@ def _update_squad_news(squad_id: int, db_conn: sqlite3.Connection) -> Union[bool
 
     news_request: requests.Response = proxied_request(BASE_URL + NEWS_ENDPOINT, params={'squadronId': squad_id})
     if news_request.status_code != 200:  # must not happen
-        logger.warning(f'Got not 200 status code on requesting news, content: {news_request.content}')
+        logger.warning(f'Got not 200 status code on requesting news, content: {news_request.content}, '
+                       f'code: {news_request.status_code}')
+
         # we will not break it, let next code break it by itself
 
     squad_news: dict = news_request.json()['squadron']
