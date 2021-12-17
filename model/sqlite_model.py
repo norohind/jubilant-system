@@ -30,7 +30,6 @@ class SqliteModel:
 
     @staticmethod
     def null_fdev(value):
-        print(value)
         if value == '':
             return None
 
