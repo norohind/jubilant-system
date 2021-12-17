@@ -37,6 +37,8 @@ current_season_aegis_score int,
 previous_season_aegis_score int,
 inserted_timestamp datetime default current_timestamp);
 
+create index if not exists idx_squads_states_1 on squads_states (tag) where tag is null;  --for squads_by_tag_extended_raw_keys req
+
 create view if not exists squads_view
 as
 select squad_id,
