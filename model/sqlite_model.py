@@ -18,6 +18,7 @@ class SqliteModel:
 
         self.db = sqlite3.connect('squads.sqlite', check_same_thread=False)
         self.db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+        self.db.create_function('null_fdev', 1, self.null_fdev, deterministic=True)
 
     def close_model(self) -> None:
         """
@@ -26,6 +27,18 @@ class SqliteModel:
         """
 
         self.db.close()
+
+    @staticmethod
+    def null_fdev(value):
+        print(value)
+        if value == '':
+            return None
+
+        elif value == 'None':
+            return None
+
+        else:
+            return value
 
     def list_squads_by_tag(self, tag: str, pretty_keys=False, motd=False, resolve_tags=False, extended=False) -> list:
         """

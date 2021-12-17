@@ -6,9 +6,9 @@ squads_by_tag_extended_raw_keys = """select
     owner_id,
     platform,
     created,
-    power_name,
-    super_power_name,
-    faction_name,
+    null_fdev(power_name) as power_name,
+    null_fdev(super_power_name) as super_power_name,
+    null_fdev(faction_name) as faction_name,
     user_tags,
     inserted_timestamp,
     squad_id
