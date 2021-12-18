@@ -3,6 +3,7 @@ import sqlite3
 import utils
 from . import sqlite_sql_requests
 import json
+import os
 from typing import Union
 from datetime import datetime
 
@@ -10,23 +11,22 @@ from datetime import datetime
 class SqliteModel:
     db: sqlite3.Connection
 
-    def open_model(self) -> None:
+    @property
+    def db(self):
         """
-        This method must be called before any action on model
+        One connection per request is only one method to avoid sqlite3.DatabaseError: database disk image is malformed.
+        Connections in sqlite are extremely cheap (0.22151980000001004 secs for 1000 just connections and
+        0.24141229999999325 secs for 1000 connections for this getter, thanks timeit)
+        and don't require to be closed, especially in RO mode. So, why not?
+
         :return:
         """
 
-        self.db = sqlite3.connect('squads.sqlite', check_same_thread=False)
-        self.db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
-        self.db.create_function('null_fdev', 1, self.null_fdev, deterministic=True)
+        db = sqlite3.connect(f'file:{os.environ["SQLITE_DB"]}?mode=ro', check_same_thread=False, uri=True)
+        db.row_factory = lambda c, r: dict(zip([col[0] for col in c.description], r))
+        db.create_function('null_fdev', 1, self.null_fdev, deterministic=True)
 
-    def close_model(self) -> None:
-        """
-        This method should be called before program exit
-        :return:
-        """
-
-        self.db.close()
+        return db
 
     @staticmethod
     def null_fdev(value):

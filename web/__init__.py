@@ -9,8 +9,6 @@ from EDMCLogging import get_main_logger
 logger = get_main_logger()
 logger.propagate = False
 
-model.open_model()
-
 
 class SquadsInfoByTagHtml:
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str, details_type: str) -> None:
@@ -72,13 +70,11 @@ class AppFixedLogging(falcon.App):
 
 
 application = AppFixedLogging()
-# application = falcon.App()
 application.add_route('/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTagHtml())
 
 application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag())
 
 if __name__ == '__main__':
-    model.open_model()
     import waitress
     import os
     application.add_static_route('/js', os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static'), 'js'))
