@@ -1,8 +1,13 @@
 import falcon
+import falcon.errors
 import json
 
 from model import model
 from templates_engine import render
+from EDMCLogging import get_main_logger
+
+logger = get_main_logger()
+logger.propagate = False
 
 model.open_model()
 
@@ -60,7 +65,14 @@ class SquadsInfoByTag:
         resp.text = json.dumps(model_answer)
 
 
-application = falcon.App()
+class AppFixedLogging(falcon.App):
+    def _python_error_handler(self, req: falcon.request.Request, resp: falcon.response.Response, error, params):
+        logger.warning(f'failed on {req.method} {req.path}', exc_info=error)
+        self._compose_error_response(req, resp, falcon.errors.HTTPInternalServerError())
+
+
+application = AppFixedLogging()
+# application = falcon.App()
 application.add_route('/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTagHtml())
 
 application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag())
