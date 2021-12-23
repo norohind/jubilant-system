@@ -39,10 +39,12 @@ class SqliteModel:
         else:
             return value
 
-    def list_squads_by_tag(self, tag: str, pretty_keys=False, motd=False, resolve_tags=False, extended=False) -> list:
+    def list_squads_by_tag(self, tag: str, pretty_keys=False, motd=False, resolve_tags=False, extended=False,
+                           is_pattern=False) -> list:
         """
         Take tag and return all squads with tag matches
 
+        :param is_pattern: is tag var is pattern to search
         :param extended: if false, then we don't return tags and motd anyway
         :param motd: if we should return motd with information
         :param resolve_tags: if we should resolve tags or return it as plain list of IDs
@@ -51,7 +53,16 @@ class SqliteModel:
         :return:
         """
 
-        squads = self.db.execute(sqlite_sql_requests.squads_by_tag_extended_raw_keys, {'tag': tag.upper()}).fetchall()
+        tag = tag.upper()
+
+        if is_pattern:
+            query = sqlite_sql_requests.squads_by_tag_pattern_extended_raw_keys
+            tag = f'%{tag}%'
+
+        else:
+            query = sqlite_sql_requests.squads_by_tag_extended_raw_keys
+
+        squads = self.db.execute(query, {'tag': tag}).fetchall()
         squad: dict
         for squad in squads:
             squad['user_tags'] = json.loads(squad['user_tags'])

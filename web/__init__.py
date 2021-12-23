@@ -31,6 +31,9 @@ class SquadsInfoByTagHtml:
 
 
 class SquadsInfoByTag:
+    def __init__(self, is_pattern: bool):
+        self.is_pattern = is_pattern
+
     def on_get(self, req: falcon.request.Request, resp: falcon.response.Response, tag: str, details_type: str) -> None:
         """
         Params to request:
@@ -41,7 +44,7 @@ class SquadsInfoByTag:
         :param details_type: short or extended, extended includes tags
         :param req:
         :param resp:
-        :param tag:
+        :param tag: can be full tag or pattern, depend on self.is_pattern
         :return:
         """
 
@@ -58,7 +61,7 @@ class SquadsInfoByTag:
         resolve_tags = req.params.get('resolve_tags', '').lower() == 'true'
         pretty_keys = req.params.get('pretty_keys', 'true').lower() == 'true'
 
-        model_answer = model.list_squads_by_tag(tag, pretty_keys, motd, resolve_tags, extended)
+        model_answer = model.list_squads_by_tag(tag, pretty_keys, motd, resolve_tags, extended, self.is_pattern)
 
         resp.text = json.dumps(model_answer)
 
@@ -72,7 +75,8 @@ class AppFixedLogging(falcon.App):
 application = AppFixedLogging()
 application.add_route('/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTagHtml())
 
-application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag())
+application.add_route('/api/squads/now/by-tag/{details_type}/{tag}', SquadsInfoByTag(is_pattern=False))
+application.add_route('/api/squads/now/search/by-tag/{details_type}/{tag}', SquadsInfoByTag(is_pattern=True))
 
 if __name__ == '__main__':
     import waitress
