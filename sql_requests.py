@@ -104,7 +104,7 @@ where squad_id = ? and type_of_news = 'public_statements'
 order by inserted_timestamp desc 
 limit 2;"""
 
-select_important_before_delete: str = """select name, platform, member_count, tag, user_tags, created 
+select_important_before_delete: str = """select name, platform, member_count, tag, user_tags, created, owner_name 
 from squads_view 
 where squad_id = ?;"""
 

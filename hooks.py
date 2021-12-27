@@ -232,11 +232,12 @@ def detect_removing_ru_squads(squad_id: int, db_conn: sqlite3.Connection):
     tag = important[3]
     user_tags = json.loads(important[4])
     created = important[5]
+    owner_name = important[6]
 
     if 32 in user_tags:
         # ru squad
         message = f'Deleted RU squad `{name}`\nplatform: {platform}, members: {members}, tag: {tag}, ' \
-                  f'created: {created}'
+                  f'created: {created}, owner: `{owner_name}`'
         utils.notify_discord(message)
 
     return
