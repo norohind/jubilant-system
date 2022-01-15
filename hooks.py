@@ -73,7 +73,7 @@ def detect_new_ru_squads(squad_info: dict, db_conn: sqlite3.Connection) -> None:
     check if members count satisfies low threshold
     send alert  
     """
-    MEMBERS_LOW_THRESHOLD: int = 5
+    MEMBERS_LOW_THRESHOLD: int = 1
 
     if db_conn.execute(sql_requests.check_if_squad_exists_in_db, (squad_info['id'],)).fetchone()[0] == 1:
         # squad has only one record, it means squad just discovered
