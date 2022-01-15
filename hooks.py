@@ -19,6 +19,19 @@ logger = get_main_logger()
 properly_delete_hooks: list[typing.Callable] = list()
 insert_data_hooks: list[typing.Callable] = list()
 
+SPECIAL_SQUADRONS: list = list()
+
+try:
+
+    with open('SPECIAL_SQUADRONS.txt', mode='r', encoding='utf-8') as spec_squads_file:
+        for line in spec_squads_file.readlines():
+            SPECIAL_SQUADRONS.append(int(line.strip()))
+
+except FileNotFoundError:
+    pass
+
+logger.debug(f'Specials squadrons: {json.dumps(SPECIAL_SQUADRONS)}')
+
 
 def notify_properly_delete(squad_id: int, db_conn: sqlite3.Connection) -> None:
     """Notifies all properly delete hooks, calls before deleting
@@ -135,11 +148,25 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
     old_tags: list = json.loads(old_tags_raw)
 
     message: str = str()
+    message_start = str()
+
+    # detect if squad should be observed as specially stated, should be done in separate function,
+    # but I don't feel be able to write a new function today
+    if squad_id in SPECIAL_SQUADRONS:
+        isImportant = True
+        message_start += 'Special squadron\n'
+
+    else:
+        isImportant = False
 
     # let's find out situation with RU tag
     if 32 not in new_tags and 32 not in old_tags:
         # squadron wasn't russian, isn't russian
-        return
+        if not isImportant:
+            return
+
+        else:
+            message_start += "Squadron isn't russian\n"
 
     elif 32 in new_tags and 32 in old_tags:
         # squadron was russian, is russian
@@ -202,6 +229,7 @@ def detect_important_changes_ru_squads(squad_info: dict, db_conn: sqlite3.Connec
         message += f"```diff\n{tags_diff2str(new_tags, old_tags)}```"
 
     if len(message) != 0:
+        message = message_start + message
         utils.notify_discord(f'State changing for RU squad `{squad_info["name"]}` {squad_info["tag"]}\n'
                              f'platform: {squad_info["platform"]}\nmembers: {squad_info["memberCount"]}\n'
                              f'created: {squad_info["created"]}\nowner: {squad_info["ownerName"]}\n' + message)
